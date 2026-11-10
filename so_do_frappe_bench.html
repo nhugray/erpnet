@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sơ Đồ Kiến Trúc Chi Tiết Frappe Bench - ERPNext</title>
+  <title>Sơ Đồ Kiến Trúc Chi Tiết Frappe Bench (Frappe Framework & ERPNext)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,15 +23,6 @@
               500: '#0284c7',
               600: '#0369a1',
               900: '#0c4a6e',
-            },
-            frappe: {
-              navy: '#171717',
-              blue: '#0052CC',
-              teal: '#0D9488',
-              amber: '#D97706',
-              purple: '#7C3AED',
-              rose: '#E11D48',
-              emerald: '#059669',
             }
           }
         }
@@ -46,15 +37,6 @@
     .card-shadow {
       box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
     }
-    .flow-line {
-      stroke-dasharray: 6;
-      animation: dash 25s linear infinite;
-    }
-    @keyframes dash {
-      to {
-        stroke-dashoffset: -1000;
-      }
-    }
   </style>
 </head>
 <body class="p-4 md:p-8">
@@ -65,13 +47,13 @@
       <div>
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-sky-700 text-xs font-semibold mb-3">
           <span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
-          Kiến Trúc Hạ Tầng Frappe Framework & ERPNext v16
+          Kiến Trúc Nền Tảng Frappe Framework & ERPNext
         </div>
         <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
           Sơ Đồ Kiến Trúc Toàn Diện <span class="text-sky-600">Frappe Bench</span>
         </h1>
         <p class="text-slate-500 mt-2 text-base max-w-3xl">
-          Giải phẫu hệ điều phối đa tầng: từ công cụ dòng lệnh CLI, không gian làm việc Multi-tenant, tiến trình nền tảng (Workers, Redis, Nginx) đến ánh xạ trực tiếp trong môi trường Docker dự án FLORA.
+          Mô hình chuẩn hóa toàn bộ cấu trúc thư mục, cơ chế Đa người thuê (Multi-Tenancy), tiến trình Runtime, hàng đợi tác vụ và luồng dữ liệu của hệ sinh thái Frappe Bench.
         </p>
       </div>
       <div class="flex flex-col sm:flex-row gap-3">
@@ -84,22 +66,22 @@
       </div>
     </div>
 
-    <!-- 3 CORE PILLARS -->
+    <!-- 3 CORE ROLES OF BENCH -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
       <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
-        <div class="text-xs font-bold uppercase tracking-wider text-sky-700 mb-1">Trụ Cột 1</div>
-        <div class="font-bold text-slate-800 text-lg">CLI Command Tool</div>
-        <p class="text-slate-600 text-sm mt-1">Lệnh điều khiển đa năng: <code class="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono text-xs text-sky-700">bench migrate</code>, <code class="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono text-xs text-sky-700">bench execute</code>, tạo site, sao lưu.</p>
+        <div class="text-xs font-bold uppercase tracking-wider text-sky-700 mb-1">1. CLI Tool</div>
+        <div class="font-bold text-slate-800 text-lg">Bộ Lệnh Điều Khiển Quản Trị</div>
+        <p class="text-slate-600 text-sm mt-1">Cung cấp CLI mạnh mẽ: <code class="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono text-xs text-sky-700">bench migrate</code>, <code class="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono text-xs text-sky-700">bench execute</code>, tạo site, sao lưu và đồng bộ CSDL.</p>
       </div>
       <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
-        <div class="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-1">Trụ Cột 2</div>
-        <div class="font-bold text-slate-800 text-lg">Workspace Manager</div>
-        <p class="text-slate-600 text-sm mt-1">Quản lý cô lập: Multi-App (<code class="font-mono text-xs">apps/</code>), Multi-Site (<code class="font-mono text-xs">sites/</code>) và môi trường Python riêng (<code class="font-mono text-xs">env/</code>).</p>
+        <div class="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-1">2. Workspace Manager</div>
+        <div class="font-bold text-slate-800 text-lg">Quản Lý Không Gian Đa Ứng Dụng</div>
+        <p class="text-slate-600 text-sm mt-1">Quản lý cách ly Multi-App (<code class="font-mono text-xs">apps/</code>), Multi-Site (<code class="font-mono text-xs">sites/</code>) và môi trường Python Virtualenv (<code class="font-mono text-xs">env/</code>).</p>
       </div>
       <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
-        <div class="text-xs font-bold uppercase tracking-wider text-purple-700 mb-1">Trụ Cột 3</div>
-        <div class="font-bold text-slate-800 text-lg">Process Orchestrator</div>
-        <p class="text-slate-600 text-sm mt-1">Tự động cấu hình & kết nối Nginx, Gunicorn, Redis Cache/Queue, RQ Background Worker, Socket.io.</p>
+        <div class="text-xs font-bold uppercase tracking-wider text-purple-700 mb-1">3. Process Orchestrator</div>
+        <div class="font-bold text-slate-800 text-lg">Điều Phối Tiến Trình Vận Hành</div>
+        <p class="text-slate-600 text-sm mt-1">Tự động cấu hình và giám sát Nginx, Gunicorn WSGI, RQ Background Workers, Scheduler và 3 cụm Redis.</p>
       </div>
     </div>
   </header>
@@ -111,132 +93,136 @@
       <div class="mb-6">
         <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-3">
           <span class="p-2 bg-sky-100 text-sky-700 rounded-lg text-lg">🏛️</span>
-          Sơ Đồ Kiến Trúc Đa Tầng Frappe Bench
+          Sơ Đồ Tương Tác Các Tầng Kiến Trúc Frappe Bench
         </h2>
-        <p class="text-slate-500 text-sm mt-1">Mối quan hệ tương hỗ giữa người dùng, CLI Bench, tầng Web/Worker, dịch vụ đệm và cơ sở dữ liệu</p>
+        <p class="text-slate-500 text-sm mt-1">Mô hình phân luồng từ Client Gateway đến Không gian Bench, Tầng Đệm và Cơ sở dữ liệu quan hệ</p>
       </div>
 
       <div class="overflow-x-auto p-4 bg-slate-50/70 rounded-xl border border-slate-100">
-        <svg viewBox="0 0 1100 680" class="w-full min-w-[950px] font-sans" xmlns="http://www.w3.org/2000/svg">
-          <!-- Background grids & frames -->
-          <rect x="10" y="10" width="1080" height="660" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+        <svg viewBox="0 0 1100 700" class="w-full min-w-[950px] font-sans" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background frames -->
+          <rect x="10" y="10" width="1080" height="680" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
           
           <!-- LAYER 1: CLIENT & OPERATOR -->
           <g>
-            <rect x="40" y="40" width="280" height="110" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
-            <text x="60" y="70" font-weight="700" fill="#0f172a" font-size="15">1. Người Vận Hành & Khách Hàng</text>
-            <rect x="60" y="85" width="115" height="45" rx="8" fill="#e0f2fe" stroke="#38bdf8"/>
-            <text x="75" y="112" font-size="12" font-weight="600" fill="#0369a1">Web Browser</text>
-            <rect x="185" y="85" width="115" height="45" rx="8" fill="#f3e8ff" stroke="#c084fc"/>
-            <text x="195" y="112" font-size="12" font-weight="600" fill="#6b21a8">Bench CLI (Admin)</text>
+            <rect x="40" y="40" width="280" height="115" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+            <text x="60" y="70" font-weight="700" fill="#0f172a" font-size="15">1. Người Dùng & Quản Trị Viên</text>
+            <rect x="60" y="85" width="115" height="48" rx="8" fill="#e0f2fe" stroke="#38bdf8"/>
+            <text x="73" y="106" font-size="12" font-weight="700" fill="#0369a1">Trình Duyệt Web</text>
+            <text x="73" y="122" font-size="10" fill="#0284c7">Desk UI / REST Client</text>
+
+            <rect x="185" y="85" width="115" height="48" rx="8" fill="#f3e8ff" stroke="#c084fc"/>
+            <text x="195" y="106" font-size="12" font-weight="700" fill="#6b21a8">Bench CLI (Admin)</text>
+            <text x="195" y="122" font-size="10" fill="#7e22ce">Terminal / SSH / Docker</text>
           </g>
 
           <!-- LAYER 2: REVERSE PROXY & GATEWAY -->
           <g>
-            <rect x="370" y="40" width="310" height="110" rx="12" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
-            <text x="390" y="70" font-weight="700" fill="#1e3a8a" font-size="15">2. Cổng Nginx (Port 8080 / 443)</text>
-            <text x="390" y="92" font-size="12" fill="#3b82f6">• Điều phối tải & Chặn SSL Termination</text>
-            <text x="390" y="112" font-size="12" fill="#3b82f6">• Trả tĩnh trực tiếp: /assets, /files</text>
-            <text x="390" y="132" font-size="12" fill="#3b82f6">• Reverse proxy qua Gunicorn & Socket.io</text>
+            <rect x="360" y="40" width="320" height="115" rx="12" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+            <text x="380" y="70" font-weight="700" fill="#1e3a8a" font-size="15">2. Reverse Proxy Nginx (Port 80 / 443 / 8080)</text>
+            <text x="380" y="93" font-size="12" fill="#2563eb">• Phân luồng tên miền đa Site (HTTP Host header)</text>
+            <text x="380" y="113" font-size="12" fill="#2563eb">• Phục vụ trực tiếp Static Assets: /assets, /files</text>
+            <text x="380" y="133" font-size="12" fill="#2563eb">• Chuyển tiếp Request tới Gunicorn & Node Socket.io</text>
           </g>
 
           <!-- LAYER 3: REALTIME SOCKET.IO -->
           <g>
-            <rect x="730" y="40" width="330" height="110" rx="12" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"/>
-            <text x="750" y="70" font-weight="700" fill="#92400e" font-size="15">3. Node.js Socket.io (Port 9000)</text>
-            <text x="750" y="92" font-size="12" fill="#b45309">• Đẩy thông báo tức thời (Realtime Push)</text>
-            <text x="750" y="112" font-size="12" fill="#b45309">• Khóa cộng tác tài liệu (Doc Lock / Viewers)</text>
-            <text x="750" y="132" font-size="12" fill="#b45309">• Đồng bộ trạng thái đơn hàng POS / OMS</text>
+            <rect x="720" y="40" width="340" height="115" rx="12" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"/>
+            <text x="740" y="70" font-weight="700" fill="#92400e" font-size="15">3. Node.js Socket.IO Server (Port 9000)</text>
+            <text x="740" y="93" font-size="12" fill="#b45309">• Đẩy thông báo thời gian thực (Realtime Event Push)</text>
+            <text x="740" y="113" font-size="12" fill="#b45309">• Theo dõi trạng thái tài liệu & khóa người xem đồng thời</text>
+            <text x="740" y="133" font-size="12" fill="#b45309">• Cập nhật tiến độ tiến trình nền qua WebSocket</text>
           </g>
 
           <!-- CONNECTORS TOP -->
-          <path d="M 175 130 L 175 190 L 525 190 L 525 150" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4"/>
-          <path d="M 525 150 L 525 210" fill="none" stroke="#3b82f6" stroke-width="2.5" marker-end="url(#arrow)"/>
-          <path d="M 680 95 L 730 95" fill="none" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrow)"/>
+          <path d="M 175 133 L 175 190 L 520 190 L 520 155" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4"/>
+          <path d="M 520 155 L 520 215" fill="none" stroke="#3b82f6" stroke-width="2.5" marker-end="url(#arrow)"/>
+          <path d="M 680 97 L 720 97" fill="none" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrow)"/>
 
           <!-- CORE FRAPPE BENCH CONTAINER (BOUNDED RECT) -->
-          <rect x="40" y="210" width="1020" height="280" rx="16" fill="#f8fafc" stroke="#0284c7" stroke-width="2" stroke-dasharray="6 3"/>
-          <text x="60" y="238" font-weight="800" fill="#0369a1" font-size="16">VÙNG LÀM VIỆC FRAPPE BENCH (/home/frappe/frappe-bench)</text>
+          <rect x="40" y="215" width="1020" height="295" rx="16" fill="#f8fafc" stroke="#0284c7" stroke-width="2" stroke-dasharray="6 3"/>
+          <text x="60" y="243" font-weight="800" fill="#0369a1" font-size="16">KHÔNG GIAN LÀM VIỆC FRAPPE BENCH (/home/frappe/frappe-bench)</text>
 
           <!-- SUB-BOX 1: PYTHON RUNTIME & APPS -->
           <g>
-            <rect x="65" y="260" width="310" height="205" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-            <text x="80" y="288" font-weight="700" fill="#0f172a" font-size="14">Thư Mục apps/ & env/</text>
-            <rect x="80" y="305" width="280" height="35" rx="6" fill="#f1f5f9"/>
-            <text x="92" y="328" font-size="12" font-mono font-weight="600" fill="#334155">frappe/ (Core ORM, Auth, UI, API)</text>
-            <rect x="80" y="348" width="280" height="35" rx="6" fill="#f1f5f9"/>
-            <text x="92" y="371" font-size="12" font-mono font-weight="600" fill="#334155">erpnext/ (Kho, Mua hàng, Bán lẻ, POS)</text>
-            <rect x="80" y="391" width="280" height="35" rx="6" fill="#e0f2fe"/>
-            <text x="92" y="414" font-size="12" font-mono font-weight="600" fill="#0369a1">env/ (Python 3.11/3.12 Virtualenv)</text>
-            <text x="80" y="450" font-size="11" fill="#64748b">Quản lý phụ thuộc: numpy, pandas, mysqlclient</text>
+            <rect x="65" y="265" width="310" height="225" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+            <text x="80" y="293" font-weight="700" fill="#0f172a" font-size="14">Thư Mục apps/ & env/</text>
+            <rect x="80" y="310" width="280" height="38" rx="6" fill="#f1f5f9"/>
+            <text x="92" y="334" font-size="12" font-mono font-weight="600" fill="#334155">frappe/ (Core ORM, Auth, Desk, REST API)</text>
+            <rect x="80" y="356" width="280" height="38" rx="6" fill="#f1f5f9"/>
+            <text x="92" y="380" font-size="12" font-mono font-weight="600" fill="#334155">erpnext/ (Standard ERP Modules)</text>
+            <rect x="80" y="402" width="280" height="38" rx="6" fill="#e0f2fe"/>
+            <text x="92" y="426" font-size="12" font-mono font-weight="600" fill="#0369a1">env/ (Python 3.10+ Virtual Environment)</text>
+            <text x="80" y="468" font-size="11" fill="#64748b">Quản lý thư viện cách ly: PyYAML, Jinja2, Redis-py...</text>
           </g>
 
           <!-- SUB-BOX 2: GUNICORN & PROCESSES -->
           <g>
-            <rect x="400" y="260" width="310" height="205" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-            <text x="415" y="288" font-weight="700" fill="#0f172a" font-size="14">WSGI Web Server & Scheduler</text>
-            <rect x="415" y="305" width="280" height="42" rx="6" fill="#f0fdf4" stroke="#86efac"/>
-            <text x="425" y="325" font-size="12" font-bold fill="#166534">Gunicorn HTTP Workers (Port 8000)</text>
-            <text x="425" y="340" font-size="11" fill="#15803d">Xử lý Request, REST API, Frappe Controller</text>
+            <rect x="400" y="265" width="310" height="225" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+            <text x="415" y="293" font-weight="700" fill="#0f172a" font-size="14">WSGI Web Server & Tiến Trình Nền</text>
+            <rect x="415" y="310" width="280" height="46" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+            <text x="425" y="330" font-size="12" font-bold fill="#166534">Gunicorn HTTP Workers (Port 8000)</text>
+            <text x="425" y="347" font-size="11" fill="#15803d">frappe.app.application: Xử lý request, sinh Desk UI</text>
 
-            <rect x="415" y="355" width="280" height="42" rx="6" fill="#fdf4ff" stroke="#f0abfc"/>
-            <text x="425" y="375" font-size="12" font-bold fill="#86198f">Frappe Scheduler (Cron Engine)</text>
-            <text x="425" y="390" font-size="11" fill="#a21caf">Kích hoạt tác vụ định kỳ: daily, hourly, weekly</text>
+            <rect x="415" y="364" width="280" height="46" rx="6" fill="#fdf4ff" stroke="#f0abfc"/>
+            <text x="425" y="384" font-size="12" font-bold fill="#86198f">Frappe Scheduler (Cron Daemon)</text>
+            <text x="425" y="401" font-size="11" fill="#a21caf">Kích hoạt tác vụ định kỳ: all, hourly, daily, weekly</text>
 
-            <rect x="415" y="405" width="280" height="42" rx="6" fill="#fef2f2" stroke="#fca5a5"/>
-            <text x="425" y="425" font-size="12" font-bold fill="#991b1b">RQ Background Workers (Celery Alt)</text>
-            <text x="425" y="440" font-size="11" fill="#b91c1c">Default, Short, Long queue: gửi mail, AI PO</text>
+            <rect x="415" y="418" width="280" height="46" rx="6" fill="#fef2f2" stroke="#fca5a5"/>
+            <text x="425" y="438" font-size="12" font-bold fill="#991b1b">RQ Background Workers (Hàng Đợi)</text>
+            <text x="425" y="455" font-size="11" fill="#b91c1c">Phân luồng hàng đợi: short, default, long</text>
           </g>
 
           <!-- SUB-BOX 3: MULTI-TENANT SITES -->
           <g>
-            <rect x="735" y="260" width="305" height="205" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-            <text x="750" y="288" font-weight="700" fill="#0f172a" font-size="14">Thư Mục sites/ (Multi-Tenant)</text>
+            <rect x="735" y="265" width="305" height="225" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+            <text x="750" y="293" font-weight="700" fill="#0f172a" font-size="14">Thư Mục sites/ (Multi-Tenancy)</text>
             
-            <rect x="750" y="305" width="275" height="70" rx="8" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.5"/>
-            <text x="762" y="325" font-size="12" font-bold fill="#0284c7">Site: frontend (Dự án FLORA)</text>
-            <text x="762" y="343" font-size="11" font-mono fill="#475569">📄 site_config.json (DB password)</text>
-            <text x="762" y="360" font-size="11" font-mono fill="#475569">📁 private/ & public/files (Chứng từ)</text>
+            <rect x="750" y="310" width="275" height="78" rx="8" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.5"/>
+            <text x="762" y="330" font-size="12" font-bold fill="#0284c7">Cấu Trúc Site Cụ Thể (Mỗi Site 1 CSDL)</text>
+            <text x="762" y="348" font-size="11" font-mono fill="#475569">📄 site_config.json (DB Name & Password)</text>
+            <text x="762" y="365" font-size="11" font-mono fill="#475569">📁 public/files/ & private/files/</text>
+            <text x="762" y="380" font-size="11" font-mono fill="#475569">📁 locks/ (Scheduler / Migrate lock)</text>
 
-            <rect x="750" y="385" width="275" height="62" rx="8" fill="#f8fafc" stroke="#cbd5e1"/>
-            <text x="762" y="405" font-size="12" font-semibold fill="#334155">Cấu hình dùng chung (Common):</text>
-            <text x="762" y="422" font-size="11" font-mono fill="#475569">📄 common_site_config.json</text>
-            <text x="762" y="438" font-size="11" font-mono fill="#475569">📄 apps.txt (Danh sách app active)</text>
+            <rect x="750" y="398" width="275" height="70" rx="8" fill="#f8fafc" stroke="#cbd5e1"/>
+            <text x="762" y="418" font-size="12" font-semibold fill="#334155">Cấu Hình Dùng Chung Của Toàn Bench:</text>
+            <text x="762" y="435" font-size="11" font-mono fill="#475569">📄 common_site_config.json (Redis Ports)</text>
+            <text x="762" y="452" font-size="11" font-mono fill="#475569">📄 apps.txt (Danh sách app đã cài đặt)</text>
           </g>
 
           <!-- BOTTOM LAYER: DATA & CACHE SERVICES -->
-          <!-- Redis Cluster/Instances -->
+          <!-- Redis Triad -->
           <g>
-            <rect x="65" y="525" width="460" height="120" rx="12" fill="#fff1f2" stroke="#fda4af" stroke-width="1.5"/>
-            <text x="85" y="555" font-weight="700" fill="#9f1239" font-size="15">Hạ Tầng Đệm Redis (3 Instances Độc Lập)</text>
-            <rect x="85" y="570" width="135" height="60" rx="8" fill="#ffffff" stroke="#fecdd3"/>
-            <text x="95" y="592" font-size="12" font-bold fill="#be123c">Redis Cache</text>
-            <text x="95" y="608" font-size="10" fill="#881337">Cache DocType, User,</text>
-            <text x="95" y="621" font-size="10" fill="#881337">Session, Permission</text>
+            <rect x="65" y="540" width="460" height="125" rx="12" fill="#fff1f2" stroke="#fda4af" stroke-width="1.5"/>
+            <text x="85" y="570" font-weight="700" fill="#9f1239" font-size="15">Hạ Tầng Redis Triad (3 Cụm Phân Biệt)</text>
+            <rect x="85" y="585" width="135" height="65" rx="8" fill="#ffffff" stroke="#fecdd3"/>
+            <text x="95" y="607" font-size="12" font-bold fill="#be123c">Redis Cache</text>
+            <text x="95" y="623" font-size="10" fill="#881337">Cache DocType, User,</text>
+            <text x="95" y="636" font-size="10" fill="#881337">Session & Permissions</text>
 
-            <rect x="230" y="570" width="135" height="60" rx="8" fill="#ffffff" stroke="#fecdd3"/>
-            <text x="240" y="592" font-size="12" font-bold fill="#be123c">Redis Queue</text>
-            <text x="240" y="608" font-size="10" fill="#881337">Hàng đợi tiến trình</text>
-            <text x="240" y="621" font-size="10" fill="#881337">Background jobs</text>
+            <rect x="230" y="585" width="135" height="65" rx="8" fill="#ffffff" stroke="#fecdd3"/>
+            <text x="240" y="607" font-size="12" font-bold fill="#be123c">Redis Queue</text>
+            <text x="240" y="623" font-size="10" fill="#881337">Điều phối hàng đợi</text>
+            <text x="240" y="636" font-size="10" fill="#881337">cho các Worker jobs</text>
 
-            <rect x="375" y="570" width="135" height="60" rx="8" fill="#ffffff" stroke="#fecdd3"/>
-            <text x="385" y="592" font-size="12" font-bold fill="#be123c">Redis SocketIO</text>
-            <text x="385" y="608" font-size="10" fill="#881337">Pub/Sub kênh phát</text>
-            <text x="385" y="621" font-size="10" fill="#881337">realtime sự kiện</text>
+            <rect x="375" y="585" width="135" height="65" rx="8" fill="#ffffff" stroke="#fecdd3"/>
+            <text x="385" y="607" font-size="12" font-bold fill="#be123c">Redis SocketIO</text>
+            <text x="385" y="623" font-size="10" fill="#881337">Kênh truyền Pub/Sub</text>
+            <text x="385" y="636" font-size="10" fill="#881337">phát sóng Realtime</text>
           </g>
 
           <!-- MariaDB Database -->
           <g>
-            <rect x="560" y="525" width="480" height="120" rx="12" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1.5"/>
-            <text x="580" y="555" font-weight="700" fill="#065f46" font-size="15">Cơ Sở Dữ Liệu MariaDB 11.8 (Kho Dữ Liệu Thực Thể)</text>
-            <text x="580" y="580" font-size="12" fill="#047857">• Mỗi site trong <code class="font-mono">sites/</code> sở hữu 1 Database Schema riêng biệt (Ví dụ: <code class="font-mono text-emerald-900 font-bold">_b7b120c781aea689</code>)</text>
-            <text x="580" y="600" font-size="12" fill="#047857">• Toàn bộ DocType chuyển thành bảng với tiền tố <code class="font-mono font-bold">tab</code> (<code class="font-mono">tabItem</code>, <code class="font-mono">tabWarehouse</code>, <code class="font-mono">tabPOS Invoice</code>)</text>
-            <text x="580" y="620" font-size="12" fill="#047857">• Kết nối qua Python ORM C-Extension (<code class="font-mono">frappe.db</code> / mysqlclient pooling)</text>
+            <rect x="560" y="540" width="480" height="125" rx="12" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1.5"/>
+            <text x="580" y="570" font-weight="700" fill="#065f46" font-size="15">Hệ Quản Trị Cơ Sở Dữ Liệu MariaDB / PostgreSQL</text>
+            <text x="580" y="595" font-size="12" fill="#047857">• Mỗi Site trong <code class="font-mono">sites/</code> sở hữu một CSDL Database Schema riêng</text>
+            <text x="580" y="615" font-size="12" fill="#047857">• DocType chuẩn hóa thành bảng vật lý có tiền tố <code class="font-mono font-bold">tab</code> (vd: <code class="font-mono">tabUser</code>, <code class="font-mono">tabDocType</code>)</text>
+            <text x="580" y="635" font-size="12" fill="#047857">• Kết nối qua Python DB-API C-Extension (<code class="font-mono">frappe.database.mariadb</code>)</text>
           </g>
 
           <!-- CONNECTORS BOTTOM -->
-          <path d="M 555 465 L 555 495 L 295 495 L 295 525" fill="none" stroke="#f43f5e" stroke-width="2" marker-end="url(#arrow)"/>
-          <path d="M 555 465 L 555 495 L 800 495 L 800 525" fill="none" stroke="#10b981" stroke-width="2" marker-end="url(#arrow)"/>
+          <path d="M 555 490 L 555 515 L 295 515 L 295 540" fill="none" stroke="#f43f5e" stroke-width="2" marker-end="url(#arrow)"/>
+          <path d="M 555 490 L 555 515 L 800 515 L 800 540" fill="none" stroke="#10b981" stroke-width="2" marker-end="url(#arrow)"/>
 
           <!-- Marker definitions -->
           <defs>
@@ -253,9 +239,9 @@
       <div class="mb-6">
         <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-3">
           <span class="p-2 bg-emerald-100 text-emerald-700 rounded-lg text-lg">📂</span>
-          Giải Mã Cấu Trúc Thư Mục `frappe-bench`
+          Giải Phẫu Cấu Trúc Thư Mục `frappe-bench`
         </h2>
-        <p class="text-slate-500 text-sm mt-1">Cách tổ chức mã nguồn, phân vùng site và quản lý file của một Bench tiêu chuẩn</p>
+        <p class="text-slate-500 text-sm mt-1">Cách bố trí các phân vùng tệp mã nguồn, dữ liệu tenant và môi trường thực thi</p>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -264,23 +250,23 @@
         <div class="border border-slate-200 rounded-xl p-5 hover:border-sky-300 transition-colors">
           <div class="flex items-center gap-3 mb-3">
             <span class="p-2 bg-sky-50 text-sky-600 rounded-lg font-mono font-bold text-sm">/apps</span>
-            <h3 class="font-bold text-slate-800 text-base">Thư mục Chứa Mã Nguồn Ứng Dụng (Apps)</h3>
+            <h3 class="font-bold text-slate-800 text-base">Thư Mục Ứng Dụng (Apps Directory)</h3>
           </div>
           <p class="text-slate-600 text-sm mb-3">
-            Nơi đặt toàn bộ mã nguồn của các ứng dụng Python / JS. Mỗi app là một Git repository độc lập có file <code class="bg-slate-100 px-1 rounded text-xs font-mono">setup.py</code> và <code class="bg-slate-100 px-1 rounded text-xs font-mono">hooks.py</code>.
+            Chứa mã nguồn của toàn bộ các ứng dụng Frappe. Mỗi ứng dụng là một package Python chuẩn và một Git repository độc lập.
           </p>
           <ul class="space-y-2 text-xs text-slate-700">
             <li class="p-2 bg-slate-50 rounded flex items-start gap-2">
               <span class="text-sky-600 font-bold">•</span>
-              <div><strong class="text-slate-900 font-mono">apps/frappe/</strong>: Hệ điều hành lõi (Core Framework). Cung cấp User Auth, RBAC, REST API engine, ORM, Desk UI.</div>
+              <div><strong class="text-slate-900 font-mono">apps/frappe/</strong>: Framework cốt lõi (Core Engine). Đảm nhiệm xác thực, phân quyền (RBAC), ORM, REST API và giao diện Web Desk.</div>
             </li>
             <li class="p-2 bg-slate-50 rounded flex items-start gap-2">
               <span class="text-sky-600 font-bold">•</span>
-              <div><strong class="text-slate-900 font-mono">apps/erpnext/</strong>: Gói ERP hoàn chỉnh (Bán hàng, Mua hàng, Tồn kho đa điểm, BOM Bếp Trung Tâm, POS).</div>
+              <div><strong class="text-slate-900 font-mono">apps/erpnext/</strong>: Ứng dụng nghiệp vụ toàn diện (Mua hàng, Bán hàng, Kho vận, Kế toán, Sản xuất, Nhân sự).</div>
             </li>
-            <li class="p-2 bg-sky-50 rounded flex items-start gap-2 text-sky-900">
+            <li class="p-2 bg-slate-50 rounded flex items-start gap-2">
               <span class="text-sky-600 font-bold">•</span>
-              <div><strong class="text-slate-900 font-mono">apps/ai_agent/ (hoặc custom app)</strong>: Module mở rộng nơi bạn có thể nhúng logic dự báo AI FLORA vào ERPNext.</div>
+              <div><strong class="text-slate-900 font-mono">apps/custom_app/</strong>: Các ứng dụng tự phát triển để mở rộng chức năng mà không làm thay đổi mã nguồn gốc (thông qua cơ chế <code class="font-mono text-sky-700">hooks.py</code>).</div>
             </li>
           </ul>
         </div>
@@ -289,23 +275,23 @@
         <div class="border border-slate-200 rounded-xl p-5 hover:border-emerald-300 transition-colors">
           <div class="flex items-center gap-3 mb-3">
             <span class="p-2 bg-emerald-50 text-emerald-600 rounded-lg font-mono font-bold text-sm">/sites</span>
-            <h3 class="font-bold text-slate-800 text-base">Thư mục Đa Người Thuê (Multi-Tenant Sites)</h3>
+            <h3 class="font-bold text-slate-800 text-base">Phân Vùng Đa Người Thuê (Multi-Tenant Sites)</h3>
           </div>
           <p class="text-slate-600 text-sm mb-3">
-            Mỗi site đại diện cho 1 domain/tenant có một CSDL MariaDB riêng, tệp cấu hình và kho lưu trữ file đính kèm độc lập.
+            Một Bench duy nhất có thể phục vụ nhiều Site độc lập. Mỗi Site sở hữu một CSDL riêng biệt và thư mục lưu trữ chứng từ tách biệt.
           </p>
           <ul class="space-y-2 text-xs text-slate-700">
             <li class="p-2 bg-slate-50 rounded flex items-start gap-2">
               <span class="text-emerald-600 font-bold">•</span>
-              <div><strong class="text-slate-900 font-mono">sites/frontend/site_config.json</strong>: Chứa <code class="font-mono text-emerald-700">db_name</code>, <code class="font-mono text-emerald-700">db_password</code>, khóa mã hóa <code class="font-mono">encryption_key</code>.</div>
+              <div><strong class="text-slate-900 font-mono">sites/common_site_config.json</strong>: Cấu hình cổng Redis, Socket.io và thiết lập chung áp dụng cho mọi Site.</div>
             </li>
             <li class="p-2 bg-slate-50 rounded flex items-start gap-2">
               <span class="text-emerald-600 font-bold">•</span>
-              <div><strong class="text-slate-900 font-mono">sites/frontend/public/</strong> & <strong class="text-slate-900 font-mono">private/</strong>: Lưu trữ ảnh sản phẩm, file hóa đơn, chứng từ mua bán.</div>
+              <div><strong class="text-slate-900 font-mono">sites/{site_name}/site_config.json</strong>: Tên CSDL (<code class="font-mono text-emerald-700">db_name</code>), mật khẩu (<code class="font-mono text-emerald-700">db_password</code>), và khóa mã hóa dữ liệu.</div>
             </li>
             <li class="p-2 bg-slate-50 rounded flex items-start gap-2">
               <span class="text-emerald-600 font-bold">•</span>
-              <div><strong class="text-slate-900 font-mono">sites/apps.txt</strong>: Liệt kê các ứng dụng được nạp vào site (mỗi dòng là 1 app: <code class="font-mono">frappe</code>, <code class="font-mono">erpnext</code>).</div>
+              <div><strong class="text-slate-900 font-mono">sites/{site_name}/public/ & private/</strong>: Phân vùng tệp tải lên (Public files phục vụ trực tiếp qua Nginx, Private files yêu cầu xác thực quyền người dùng).</div>
             </li>
           </ul>
         </div>
@@ -317,13 +303,15 @@
             <h3 class="font-bold text-slate-800 text-base">Môi Trường Ảo Python (Virtual Environment)</h3>
           </div>
           <p class="text-slate-600 text-sm mb-3">
-            Tách biệt hoàn toàn thư viện Python của Bench với Python hệ điều hành máy chủ, tránh xung đột phiên bản.
+            Môi trường thực thi Python cô lập hoàn toàn với hệ thống máy chủ, lưu trữ toàn bộ các package phụ thuộc cài qua pip.
           </p>
           <div class="bg-slate-900 text-slate-100 p-3 rounded-lg font-mono text-xs overflow-x-auto">
-            <div><span class="text-slate-500"># Kiểm tra gói thư viện trong env của bench:</span></div>
-            <div>/home/frappe/frappe-bench/env/bin/pip list</div>
-            <div class="text-emerald-400 mt-1">frappe==16.0.0-dev | erpnext==16.0.0-dev</div>
-            <div class="text-slate-400">google-genai, pandas, numpy, scikit-learn...</div>
+            <div class="text-slate-400"># Cấu trúc thư mục env/</div>
+            <div>env/bin/python        <span class="text-slate-500"># Trình thông dịch Python</span></div>
+            <div>env/bin/gunicorn      <span class="text-slate-500"># WSGI HTTP Server</span></div>
+            <div>env/lib/python3.x/site-packages/</div>
+            <div class="text-emerald-400 mt-1">├── frappe (editable install: -e apps/frappe)</div>
+            <div class="text-emerald-400">└── erpnext (editable install: -e apps/erpnext)</div>
           </div>
         </div>
 
@@ -331,23 +319,23 @@
         <div class="border border-slate-200 rounded-xl p-5 hover:border-amber-300 transition-colors">
           <div class="flex items-center gap-3 mb-3">
             <span class="p-2 bg-amber-50 text-amber-600 rounded-lg font-mono font-bold text-sm">/config & /logs</span>
-            <h3 class="font-bold text-slate-800 text-base">Cấu Hình Vận Hành & Nhật Ký Lỗi</h3>
+            <h3 class="font-bold text-slate-800 text-base">Tệp Cấu Hình Tự Động & Nhật Ký Hệ Thống</h3>
           </div>
           <p class="text-slate-600 text-sm mb-3">
-            Bench tự động tạo ra file cấu hình của các dịch vụ từ lệnh <code class="bg-slate-100 px-1 rounded text-xs font-mono">bench setup</code>.
+            Bench đóng vai trò sinh cấu hình tự động (Configuration Generator) cho các phần mềm phụ trợ hệ thống.
           </p>
           <ul class="space-y-2 text-xs text-slate-700">
             <li class="p-2 bg-slate-50 rounded flex items-start gap-2">
               <span class="text-amber-600 font-bold">•</span>
-              <div><strong class="text-slate-900 font-mono">config/nginx.conf</strong>: File cấu hình Nginx tự sinh theo danh sách domains của tất cả các sites.</div>
+              <div><strong class="text-slate-900 font-mono">config/nginx.conf</strong>: File cấu hình Virtual Host Nginx ánh xạ tên miền tới các Site tương ứng.</div>
             </li>
             <li class="p-2 bg-slate-50 rounded flex items-start gap-2">
               <span class="text-amber-600 font-bold">•</span>
-              <div><strong class="text-slate-900 font-mono">logs/frappe.log</strong>: Ghi lại các lỗi Exception, lỗi REST API, hoặc lỗi phát sinh trong mã nguồn.</div>
+              <div><strong class="text-slate-900 font-mono">config/supervisor.conf</strong>: Tệp giám sát tiến trình Gunicorn, Workers và Scheduler (khi chạy không dùng Docker).</div>
             </li>
             <li class="p-2 bg-slate-50 rounded flex items-start gap-2">
               <span class="text-amber-600 font-bold">•</span>
-              <div><strong class="text-slate-900 font-mono">logs/worker.log</strong>: Theo dõi tiến độ các tác vụ nền (Background Queue).</div>
+              <div><strong class="text-slate-900 font-mono">logs/</strong>: Chứa <code class="font-mono">frappe.log</code>, <code class="font-mono">web.error.log</code>, <code class="font-mono">worker.log</code>, và <code class="font-mono">schedule.log</code>.</div>
             </li>
           </ul>
         </div>
@@ -355,17 +343,16 @@
       </div>
     </section>
 
-    <!-- PHẦN 3: TIẾN TRÌNH RUNTIME & VÒNG ĐỜI LỆNH (EXECUTION LIFECYCLE) -->
+    <!-- PHẦN 3: VÒNG ĐỜI RUNTIME (EXECUTION & REQUEST LIFECYCLE) -->
     <section id="runtime" class="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 card-shadow">
       <div class="mb-6">
         <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-3">
           <span class="p-2 bg-purple-100 text-purple-700 rounded-lg text-lg">⚡</span>
-          Vòng Đời Hoạt Động (Runtime Lifecycle): Lệnh Bench & Web Request
+          Vòng Đời Hoạt Động (Runtime Lifecycle)
         </h2>
-        <p class="text-slate-500 text-sm mt-1">Điều gì thực sự xảy ra bên dưới khi bạn gõ một lệnh Bench hoặc gửi một yêu cầu API?</p>
+        <p class="text-slate-500 text-sm mt-1">Cơ chế xử lý một yêu cầu HTTP hoặc lệnh CLI từ khi khởi tạo đến khi lưu trữ dữ liệu</p>
       </div>
 
-      <!-- STEP BY STEP PROCESS -->
       <div class="relative pl-6 md:pl-10 space-y-8 before:absolute before:left-3 md:before:left-5 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200">
         
         <!-- STEP 1 -->
@@ -375,11 +362,11 @@
           </div>
           <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
             <h4 class="font-bold text-slate-900 text-sm md:text-base flex items-center justify-between">
-              <span>Khởi tạo Ngữ Cảnh (Context Initialization)</span>
+              <span>Định Danh Site & Khởi Tạo Ngữ Cảnh</span>
               <span class="text-xs font-mono bg-sky-100 text-sky-800 px-2 py-0.5 rounded">frappe.init(site)</span>
             </h4>
             <p class="text-slate-600 text-xs md:text-sm mt-2">
-              Bench đọc tham số <code class="font-mono text-xs">--site frontend</code>, tra cứu vào thư mục <code class="font-mono text-xs">sites/frontend/site_config.json</code> để lấy thông tin xác thực Database. Nó thiết lập biến thread-local <code class="font-mono text-xs">frappe.local</code> chứa thông tin phiên làm việc, múi giờ, ngôn ngữ.
+              Khi nhận yêu cầu (từ HTTP Host header của Nginx hoặc tham số CLI <code class="font-mono text-xs">--site &lt;name&gt;</code>), Frappe xác định thư mục Site đích, đọc file <code class="font-mono text-xs">site_config.json</code> và khởi tạo biến ngữ cảnh luồng (<code class="font-mono text-xs">frappe.local</code>).
             </p>
           </div>
         </div>
@@ -391,11 +378,11 @@
           </div>
           <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
             <h4 class="font-bold text-slate-900 text-sm md:text-base flex items-center justify-between">
-              <span>Kết Nối Database & Đệm Cache (Database & Redis Connect)</span>
+              <span>Mở Kết Nối Cơ Sở Dữ Liệu & Nạp Bộ Nhớ Đệm</span>
               <span class="text-xs font-mono bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">frappe.connect()</span>
             </h4>
             <p class="text-slate-600 text-xs md:text-sm mt-2">
-              Frappe mở connection pool tới CSDL MariaDB cụ thể của site (<code class="font-mono text-xs">_b7b120c781aea689</code>). Đồng thời kết nối tới Redis Cache để nạp cấu hình DocType, phân quyền User Roles mà không phải quét lại toàn bộ bảng.
+              Thiết lập kết nối an toàn tới Schema CSDL riêng của Site trên MariaDB. Đồng thời kết nối tới cụm Redis Cache để nạp nhanh định nghĩa DocType, phân quyền User Roles mà không phải thực hiện các truy vấn đĩa tốn kém.
             </p>
           </div>
         </div>
@@ -407,17 +394,18 @@
           </div>
           <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
             <h4 class="font-bold text-slate-900 text-sm md:text-base flex items-center justify-between">
-              <span>Thực Thi Logic ORM & Kích Hoạt Hooks</span>
+              <span>Thực Thi ORM, Quy Tắc Nghiệp Vụ & Hooks</span>
               <span class="text-xs font-mono bg-purple-100 text-purple-800 px-2 py-0.5 rounded">DocType Controller</span>
             </h4>
             <p class="text-slate-600 text-xs md:text-sm mt-2">
-              Script hoặc hàm API được gọi (ví dụ tạo đơn Mua Hàng Purchase Order). Frappe tự động kích hoạt chuỗi sự kiện vòng đời:
+              Mã nguồn controller xử lý dữ liệu thông qua vòng đời chuẩn:
               <span class="inline-flex gap-1 flex-wrap mt-1">
                 <code class="text-xs font-mono bg-white px-1.5 py-0.5 border rounded">validate()</code> ➔ 
                 <code class="text-xs font-mono bg-white px-1.5 py-0.5 border rounded">before_save()</code> ➔ 
                 <code class="text-xs font-mono bg-white px-1.5 py-0.5 border rounded">on_submit()</code> ➔ 
                 <code class="text-xs font-mono bg-white px-1.5 py-0.5 border rounded">on_update()</code>
               </span>.
+              Các tác vụ kéo dài (gửi email, xử lý số liệu lớn) được đẩy vào Redis Queue để Workers xử lý bất đồng bộ.
             </p>
           </div>
         </div>
@@ -429,80 +417,12 @@
           </div>
           <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
             <h4 class="font-bold text-slate-900 text-sm md:text-base flex items-center justify-between">
-              <span>Commit Dữ Liệu & Giải Phóng Tài Nguyên</span>
+              <span>Cam Kết Giao Dịch & Giải Phóng Tài Nguyên</span>
               <span class="text-xs font-mono bg-amber-100 text-amber-800 px-2 py-0.5 rounded">frappe.destroy()</span>
             </h4>
             <p class="text-slate-600 text-xs md:text-sm mt-2">
-              Thực hiện <code class="font-mono text-xs">frappe.db.commit()</code> để ghi vĩnh viễn dữ liệu vào MariaDB disk. Nếu có lỗi phát sinh, tự động kích hoạt <code class="font-mono text-xs">frappe.db.rollback()</code> để bảo toàn tính toàn vẹn (ACID), sau đó đóng kết nối.
+              Thực hiện <code class="font-mono text-xs">frappe.db.commit()</code> để lưu trữ vĩnh viễn thay đổi vào CSDL. Nếu xảy ra bất kỳ ngoại lệ (Exception) nào, hệ thống tự động kích hoạt <code class="font-mono text-xs">frappe.db.rollback()</code> nhằm đảm bảo nguyên vẹn dữ liệu (ACID), sau đó đóng kết nối.
             </p>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- PHẦN 4: ÁNH XẠ DOCKER VÀ THƯ MỤC TRÊN MÁY BẠN -->
-    <section class="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 card-shadow">
-      <div class="mb-6">
-        <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-3">
-          <span class="p-2 bg-blue-100 text-blue-700 rounded-lg text-lg">🐳</span>
-          Mô Hình Ánh Xạ Giữa Máy Thật (Windows) và Docker Container
-        </h2>
-        <p class="text-slate-500 text-sm mt-1">Cách các thành phần Bench liên kết trực tiếp trên máy của bạn hiện tại</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-        
-        <!-- WINDOWS HOST -->
-        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center gap-2 mb-3">
-              <span class="w-3 h-3 rounded-full bg-blue-500"></span>
-              <h3 class="font-bold text-slate-800">Máy Windows Của Bạn (Host OS)</h3>
-            </div>
-            <p class="font-mono text-xs bg-white p-2 rounded border border-slate-200 text-slate-700 mb-3">
-              c:\Users\ASUS\Downloads\erpnet
-            </p>
-            <ul class="space-y-2 text-xs text-slate-600">
-              <li>• <strong class="text-slate-800">frappe_docker/pwd.yml</strong>: Tệp khai báo kiến trúc multi-container</li>
-              <li>• <strong class="text-slate-800">Chay_ERPNext.bat / Dung_ERPNext.bat</strong>: Script bật tắt 1-click</li>
-              <li>• <strong class="text-slate-800">Docker Named Volumes</strong>:
-                <div class="mt-1 pl-2 font-mono text-[11px] text-slate-500">
-                  - frappe_docker_sites-volume (lưu toàn bộ sites/)<br>
-                  - frappe_docker_db-data (lưu MariaDB tables)<br>
-                  - frappe_docker_logs-volume (lưu nhật ký logs/)
-                </div>
-              </li>
-            </ul>
-          </div>
-          <div class="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-800">
-            💡 Dữ liệu được bảo toàn vĩnh viễn trong Docker Volume ngay cả khi bạn tắt Docker Desktop.
-          </div>
-        </div>
-
-        <!-- DOCKER CONTAINER -->
-        <div class="bg-slate-900 text-slate-200 rounded-xl p-5 flex flex-col justify-between font-mono text-xs">
-          <div>
-            <div class="flex items-center gap-2 mb-3 text-white font-sans font-bold text-sm">
-              <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
-              Bên Trong Container (frappe_docker-backend-1)
-            </div>
-            <div class="bg-slate-800 p-2.5 rounded text-sky-300 mb-3 text-[11px]">
-              /home/frappe/frappe-bench
-            </div>
-            <div class="space-y-1.5 text-slate-300 text-[11px]">
-              <div>drwxr-xr-x apps/ (frappe, erpnext)</div>
-              <div>drwxr-xr-x sites/ (frontend/)</div>
-              <div>drwxr-xr-x env/ (Python binary & packages)</div>
-              <div>drwxr-xr-x logs/ (web.log, worker.log)</div>
-            </div>
-          </div>
-          
-          <div class="mt-4 bg-slate-800/80 p-3 rounded border border-slate-700">
-            <span class="text-emerald-400 font-bold font-sans">Lệnh thực thi từ Windows vào Bench:</span>
-            <div class="text-slate-300 mt-1 select-all">
-              docker compose -f frappe_docker/pwd.yml exec backend bench --site frontend &lt;lệnh&gt;
-            </div>
           </div>
         </div>
 
@@ -510,8 +430,8 @@
     </section>
 
     <!-- FOOTER -->
-    <footer class="text-center py-6 text-slate-500 text-xs border-t border-slate-200">
-      Được thiết kế cho đề tài: <strong>Quản trị Chuỗi cung ứng và Bán lẻ Đa kênh thông minh FLORA (ERPNext + AI Agent)</strong>
+    <footer class="text-center py-6 text-slate-400 text-xs border-t border-slate-200">
+      Kiến trúc Chuẩn Hóa Frappe Framework & ERPNext (Frappe Bench Architecture Specification)
     </footer>
 
   </main>
