@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiến Trúc Tổng Thể Hệ Thống Thông Tin ERPNext & AI Agent - Chuỗi FLORA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-subtle: #f1f5f9;
+            --border-color: #e2e8f0;
+            --border-hover: #cbd5e1;
+            
+            --text-title: #0f172a;
+            --text-body: #334155;
+            --text-muted: #64748b;
+            --text-white: #ffffff;
+
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --primary-border: #bfdbfe;
+            
+            --emerald: #059669;
+            --emerald-light: #ecfdf5;
+            --emerald-border: #a7f3d0;
+            
+            --amber: #d97706;
+            --amber-light: #fffbeb;
+            --amber-border: #fde68a;
+            
+            --purple: #7c3aed;
+            --purple-light: #f5f3ff;
+            --purple-border: #ddd6fe;
+
+            --rose: #e11d48;
+            --rose-light: #fff1f2;
+            --rose-border: #fecdd3;
+
+            --cyan: #0891b2;
+            --cyan-light: #ecfeff;
+            --cyan-border: #a5f3fc;
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-body);
+            line-height: 1.6;
+            padding-bottom: 80px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 40px 24px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .badge-header {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid var(--primary-border);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-title);
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Navigation Tabs */
+        .tabs-nav {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 30px 0;
+            position: sticky;
+            top: 16px;
+            z-index: 100;
+            background: rgba(248, 250, 252, 0.95);
+            backdrop-filter: blur(8px);
+            padding: 8px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-title);
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .tab-btn.active {
+            background: var(--bg-card);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* SECTION STYLING */
+        .section-intro {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .section-intro h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-title);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-intro p {
+            color: var(--text-body);
+            font-size: 15px;
+        }
+
+        /* TIER / LAYER CARDS */
+        .architecture-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+        }
+
+        .layer-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .layer-box:hover {
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-md);
+        }
+
+        .layer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .layer-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .layer-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .layer-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-title);
+        }
+
+        .layer-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .comp-card {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .comp-card:hover {
+            background: var(--bg-card);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-2px);
+        }
+
+        .comp-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-title);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .comp-desc {
+            font-size: 13px;
+            color: var(--text-body);
+            line-height: 1.5;
+        }
+
+        .comp-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        /* LAYER SPECIFIC ACCENTS */
+        .layer-1 { border-top: 4px solid var(--cyan); }
+        .layer-1 .layer-badge { background: var(--cyan-light); color: var(--cyan); }
+        
+        .layer-2 { border-top: 4px solid var(--primary); }
+        .layer-2 .layer-badge { background: var(--primary-light); color: var(--primary); }
+
+        .layer-3 { border-top: 4px solid var(--purple); }
+        .layer-3 .layer-badge { background: var(--purple-light); color: var(--purple); }
+
+        .layer-4 { border-top: 4px solid var(--amber); }
+        .layer-4 .layer-badge { background: var(--amber-light); color: var(--amber); }
+
+        .layer-5 { border-top: 4px solid var(--emerald); }
+        .layer-5 .layer-badge { background: var(--emerald-light); color: var(--emerald); }
+
+        .layer-6 { border-top: 4px solid var(--rose); }
+        .layer-6 .layer-badge { background: var(--rose-light); color: var(--rose); }
+
+        /* ARROW FLOW CONNECTOR */
+        .flow-arrow {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 4px 0;
+        }
+        .flow-arrow::before, .flow-arrow::after {
+            content: '';
+            height: 1px;
+            background: var(--border-color);
+            flex: 1;
+        }
+
+        /* DETAIL CARDS & CODE STYLES */
+        .code-block {
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 16px;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            line-height: 1.6;
+            margin: 12px 0;
+            border: 1px solid #1e293b;
+        }
+
+        .code-keyword { color: #38bdf8; font-weight: 600; }
+        .code-string { color: #4ade80; }
+        .code-func { color: #fbbf24; }
+        .code-comment { color: #94a3b8; font-style: italic; }
+
+        /* DATABASE TABLES & DIAGRAMS */
+        .db-schema-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .db-schema-header {
+            background: var(--emerald-light);
+            border-bottom: 1px solid var(--emerald-border);
+            padding: 12px 18px;
+            font-weight: 800;
+            color: var(--emerald);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .table-custom th {
+            background: var(--bg-subtle);
+            color: var(--text-title);
+            font-weight: 700;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-custom td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-body);
+        }
+
+        .table-custom tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-custom tr:hover td {
+            background: #fafafa;
+        }
+
+        .feature-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .feature-icon {
+            color: var(--primary);
+            flex-shrink: 0;
+            margin-top: 2px;
+            font-weight: 800;
+        }
+
+        /* PRINT STYLES */
+        @media print {
+            .tabs-nav, header .badge-header { display: none; }
+            .tab-content { display: block !important; }
+            body { padding: 0; background: white; }
+            .layer-box { break-inside: avoid; margin-bottom: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="badge-header">
+            <span>🏛️ Đồ Án Chuyên Đề Hệ Thống Thông Tin & AI</span>
+        </div>
+        <h1>Kiến Trúc Tổng Thể Hệ Thống Thông Tin ERPNext & AI Agent</h1>
+        <p class="subtitle">Mô hình Quản trị Chuỗi cung ứng & Bán lẻ Đa kênh thông minh cho chuỗi cà phê và bánh ngọt FLORA (1 Bếp trung tâm + 8 Cửa hàng)</p>
+    </header>
+
+    <div class="container">
+        <!-- NAVIGATION TABS -->
+        <nav class="tabs-nav">
+            <button class="tab-btn active" onclick="switchTab('tab1')">
+                <span>📐</span> Kiến Trúc Tổng Thể 6 Tầng
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab2')">
+                <span>⚙️</span> Kiến Trúc Lõi Frappe Framework
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab3')">
+                <span>🗄️</span> Cơ Chế Kết Nối CSDL MariaDB
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab4')">
+                <span>🤖</span> Luồng Tích Hợp AI Agent (Tool Calling)
+            </button>
+        </nav>
+
+        <!-- TAB 1: KIẾN TRÚC TỔNG THỂ 6 TẦNG -->
+        <div id="tab1" class="tab-content active">
+            <div class="section-intro">
+                <h2><span>📐</span> Mô Hình Kiến Trúc Hệ Thống Thông Tin Doanh Nghiệp (Enterprise 6-Tier)</h2>
+                <p>Hệ thống được thiết kế theo chuẩn phân lớp doanh nghiệp (Enterprise Tier Architecture). Mọi luồng giao dịch từ 4 kênh bán (Cửa hàng POS, Web/App, Sàn TMĐT, Mạng xã hội) đều được hội tụ về hệ thống lõi ERPNext đảm bảo tính toàn vẹn <strong>"Một nguồn sự thật duy nhất" (Single Source of Truth)</strong>, kết hợp với Agent AI tự hành ở lớp mở rộng.</p>
+            </div>
+
+            <div class="architecture-grid">
+                
+                <!-- TẦNG 1: CLIENT & KÊNH BÁN -->
+                <div class="layer-box layer-1">
+                    <div class="layer-header">
+                        <div class="layer-title-group">
+                            <div class="layer-badge">01</div>
+                            <div>
+                                <div class="layer-title">Tầng 1: Kênh Bán Hàng & Người Dùng (Channels & Touchpoints)</div>
+                                <div class="layer-sub">Đa kênh tiếp nhận đơn hàng và các đối tượng tương tác với chuỗi FLORA</div>
+                            </div>
+                        </div>
+                        <span class="tag" style="background: var(--cyan-light); color: var(--cyan);">Omnichannel Frontend</span>
+                    </div>
+                    <div class="component-grid">
+                        <div class="comp-card">
+                            <div class="comp-title"><span>🛒</span> 8 Cửa Hàng POS Bán Lẻ</div>
+                            <div class="comp-desc">Màn hình thu ngân POS mở/đóng ca, thanh toán tiền mặt, thẻ, ví điện tử, áp dụng mã giảm giá và tích điểm hội viên.</div>
+                            <div class="comp-tags"><span class="tag">POS Invoice</span><span class="tag">Offline/Online</span></div>
+                        </div>
+                        <div class="comp-card">
+                            <div class="comp-title"><span>🌐</span> Kênh Bán Hàng Trực Tuyến</div>
+                            <div class="comp-desc">Website bán hàng FLORA, Ứng dụng di động (Mobile App), Gian hàng Shopee, Lazada và Social Commerce (TikTok/Facebook).</div>
+                            <div class="comp-tags"><span class="tag">Web Store</span><span class="tag">Webhook API</span></div>
+                        </div>
+                        <div class="comp-card">
+                            <div class="comp-title"><span>👥</span> Nhân Sự Vận Hành Nội Bộ</div>
+                            <div class="comp-desc">Thu ngân (POS), Thủ kho (Nhập/Xuất), Bếp trưởng (BOM/Sản xuất), Chuyên viên Mua hàng, Giám đốc Quản lý chuỗi.</div>
+                            <div class="comp-tags"><span class="tag">Frappe Desk UI</span><span class="tag">Phân quyền RBAC</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-arrow">HTTP / REST API / WebSocket qua cổng 443 (HTTPS)</div>
+
+                <!-- TẦNG 2: CỔNG AN NINH & ĐỊNH TUYẾN -->
+                <div class="layer-box layer-2">
+                    <div class="layer-header">
+                        <div class="layer-title-group">
+                            <div class="layer-badge">02</div>
+                            <div>
+                                <div class="layer-title">Tầng 2: Cổng Truy Cập & Bảo Mật (API Gateway & Security)</div>
+                                <div class="layer-sub">Điểm kiểm soát duy nhất bảo vệ toàn bộ dịch vụ backend bên trong</div>
+                            </div>
+                        </div>
+                        <span class="tag" style="background: var(--primary-light); color: var(--primary);">Nginx Reverse Proxy</span>
+                    </div>
+                    <div class="component-grid">
+                        <div class="comp-card">
+                            <div class="comp-title"><span>🛡️</span> Nginx Reverse Proxy (Port 8080/443)</div>
+                            <div class="comp-desc">Chịu trách nhiệm mã hóa SSL/TLS, phân phối tải (Load Balancing), chặn DDoS cơ bản, nén Gzip và phân bổ request đến đúng container.</div>
+                            <div class="comp-tags"><span class="tag">Nginx Ingress</span><span class="tag">Rate Limiting</span></div>
+                        </div>
+                        <div class="comp-card">
+                            <div class="comp-title"><span>🔐</span> Xác Thực & Phân Quyền (Auth & RBAC)</div>
+                            <div class="comp-desc">Quản lý phiên (Session Cookie) cho người dùng Web, Token-based Authentication (API Key & Secret) cho AI Agent và hệ thống bên ngoài.</div>
+                            <div class="comp-tags"><span class="tag">User Permission</span><span class="tag">DocPerm Security</span></div>
+                        </div>
+                        <div class="comp-card">
+                            <div class="comp-title"><span>📦</span> Phân Phối Tĩnh (Static Asset Handling)</div>
+                            <div class="comp-desc">Phục vụ trực tiếp tài nguyên JS, CSS, hình ảnh sản phẩm từ thư mục assets mà không cần đi qua Python Gunicorn.</div>
+                            <div class="comp-tags"><span class="tag">Cache 30 Days</span><span class="tag">HTTP/2</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-arrow">WSGI / IPC Socket / Realtime Streams</div>
+
+                <!-- TẦNG 3: LÕI NGHIỆP VỤ FRAPPE & ERPNEXT -->
+                <div class="layer-box layer-3">
+                    <div class="layer-header">
+                        <div class="layer-title-group">
+                            <div class="layer-badge">03</div>
+                            <div>
+                                <div class="layer-title">Tầng 3: Xử Lý Nghiệp Vụ Cốt Lõi (Frappe Framework & ERPNext)</div>
+                                <div class="layer-sub">Trái tim nghiệp vụ chuỗi cung ứng - Xử lý đơn hàng, kho bãi, sản xuất và tài chính</div>
+                            </div>
+                        </div>
+                        <span class="tag" style="background: var(--purple-light); color: var(--purple);">Python Gunicorn + Node.js</span>
+                    </div>
+                    <div class="component-grid">
+                        <div class="comp-card">
+                            <div class="comp-title"><span>🏭</span> Quản Lý Sản Xuất Bếp (BOM)</div>
+                            <div class="comp-desc">Định mức nguyên vật liệu (BOM) cho ~18 món bánh & đồ uống. Lập Lệnh sản xuất (Work Order), tự động trừ kho nguyên liệu và nhập kho thành phẩm.</div>
+                            <div class="comp-tags"><span class="tag">BOM</span><span class="tag">Work Order</span><span class="tag">Job Card</span></div>
+                        </div>
+                        <div class="comp-card">
+                            <div class="comp-title"><span>📦</span> Tồn Kho Đa Điểm (WMS)</div>
+                            <div class="comp-desc">Kiểm soát tồn kho thời gian thực của 1 Bếp trung tâm + 8 Kho cửa hàng. Quản lý hạn sử dụng (Batch/Expiry), ghi nhận hao hụt và điều chuyển In-transit.</div>
+                            <div class="comp-tags"><span class="tag">Stock Ledger</span><span class="tag">Bin</span><span class="tag">In-Transit</span></div>
+                        </div>
+                        <div class="comp-card">
+                            <div class="comp-title"><span>🚚</span> Quản Lý Mua Hàng (Procurement)</div>
+                            <div class="comp-desc">Tiếp nhận yêu cầu vật tư (Material Request), tạo Đơn đặt hàng mua (Purchase Order - PO) gửi nhà cung cấp, kiểm tra hàng và nhận kho (Purchase Receipt).</div>
+                            <div class="comp-tags"><span class="tag">PO</span><span class="tag">Material Request</span><span class="tag">Supplier</span></div>
+                        </div>
+                        <div class="comp-card">
+                            <div class="comp-title"><span>💰</span> Kế Toán & Đối Soát Bán Lẻ</div>
+                            <div class="comp-desc">Tự động hạch toán sổ cái (General Ledger), ghi nhận doanh thu từng ca POS, đối soát thanh toán cổng VNPay/MoMo và công nợ phải trả nhà cung cấp.</div>
+                            <div class="comp-tags"><span class="tag">GL Entry</span><span class="tag">Payment Entry</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-arrow">Hàng Đợi Công Việc & Bộ Nhớ Tạm Thời (In-Memory Middleware)</div>
+
+                <!-- TẦNG 4: HÀNG ĐỢI & CACHE -->
+                <div class="layer-box layer-4">
+                    <div class="layer-header">
+                        <div class="layer-title-group">
+                            <div class="layer-badge">04</div>
+                            <div>
+                                <div class="layer-title">Tầng 4: Bộ Nhớ Đệm & Hàng Đợi (Middleware & Caching Layer)</div>
+                                <div class="layer-sub">Đảm bảo hệ thống phản hồi cực nhanh dưới 100ms và xử lý tác vụ ngầm bất đồng bộ</div>
+                            </div>
+                        </div>
+                        <span class="tag" style="background: var(--amber-light); color: var(--amber);">Redis 6.2 In-Memory</span>
+                    </div>
+                    <div class="component-grid">
+                        <div class="comp-card">
+                            <div class="comp-title"><span>⚡</span> Redis Cache (DB 0: Port 6379)</div>
+                            <div class="comp-desc">Lưu trữ schema DocType, session người dùng, dữ liệu bảng tĩnh và kết quả truy vấn thường gặp giúp giảm 80% tải đọc trên MariaDB.</div>
+                            <div class="comp-tags"><span class="tag">Key-Value</span><span class="tag">Session Store</span></div>
+                        </div>
+                        <div class="comp-card">
+                            <div class="comp-title"><span>📨</span> Redis Queue (DB 1: RQ Workers)</div>
+                            <div class="comp-desc">Hàng đợi công việc cho các tiến trình ngầm: gửi email, cập nhật tồn kho sổ cái hàng loạt, đồng bộ dữ liệu đa kênh qua 3 hàng đợi: Short, Default, Long.</div>
+                            <div class="comp-tags"><span class="tag">Python-RQ</span><span class="tag">Async Workers</span></div>
+                        </div>
+                        <div class="comp-card">
+                            <div class="comp-title"><span>🔔</span> Redis Socket.IO (DB 2: Realtime Pub/Sub)</div>
+                            <div class="comp-desc">Cầu nối phát sóng sự kiện thời gian thực tới trình duyệt khi có đơn hàng mới từ POS hoặc khi AI Agent tạo đơn mua hàng mới.</div>
+                            <div class="comp-tags"><span class="tag">Pub/Sub</span><span class="tag">WebSocket Push</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-arrow">TCP Socket Pool / Chuẩn Kết Nối MySQL Client C-Extension</div>
+
+                <!-- TẦNG 5: CƠ SỞ DỮ LIỆU CHÍNH -->
+                <div class="layer-box layer-5">
+                    <div class="layer-header">
+                        <div class="layer-title-group">
+                            <div class="layer-badge">05</div>
+                            <div>
+                                <div class="layer-title">Tầng 5: Cơ Sở Dữ Liệu Quan Hệ (Database Storage Tier)</div>
+                                <div class="layer-sub">Lưu trữ bền vững chuẩn ACID, phân chia độc lập theo từng Site khách hàng</div>
+                            </div>
+                        </div>
+                        <span class="tag" style="background: var(--emerald-light); color: var(--emerald);">MariaDB 11.8 Enterprise</span>
+                    </div>
+                    <div class="component-grid">
+                        <div class="comp-card">
+                            <div class="comp-title"><span>🗄️</span> Cơ Sở Dữ Liệu MariaDB 11.8 (Port 3306)</div>
+                            <div class="comp-desc">Engine InnoDB với transaction isolation chuẩn, bảng UTF8MB4 lưu trữ tiếng Việt có dấu. Khóa cấp hàng (Row-level Locking) cho phép hàng trăm giao dịch POS đồng thời.</div>
+                            <div class="comp-tags"><span class="tag">InnoDB</span><span class="tag">ACID Guaranteed</span></div>
+                        </div>
+                        <div class="comp-card">
+                            <div class="comp-title"><span>🏢</span> Kiến Trúc Multi-Tenant Tách Biệt</div>
+                            <div class="comp-desc">Mỗi chi nhánh/doanh nghiệp sở hữu 1 database độc lập (Database <code>_b7b120c781aea689</code> cho site frontend). Dữ liệu được bảo mật và cô lập hoàn toàn.</div>
+                            <div class="comp-tags"><span class="tag">Site Isolated</span><span class="tag">site_config.json</span></div>
+                        </div>
+                        <div class="comp-card">
+                            <div class="comp-title"><span>💾</span> Persistent Named Volumes</div>
+                            <div class="comp-desc">Dữ liệu được bảo vệ an toàn trên ổ cứng máy chủ thông qua Docker Volumes: <code>db-data</code> (file cơ sở dữ liệu), <code>sites</code> (chứng chỉ, file đính kèm), <code>logs</code>.</div>
+                            <div class="comp-tags"><span class="tag">Zero Data Loss</span><span class="tag">Docker Volume</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-arrow">REST API HTTPS / Token Service Auth / Tool Calling Callbacks</div>
+
+                <!-- TẦNG 6: AI AGENT DỰ BÁO & MUA HÀNG -->
+                <div class="layer-box layer-6">
+                    <div class="layer-header">
+                        <div class="layer-title-group">
+                            <div class="layer-badge">06</div>
+                            <div>
+                                <div class="layer-title">Tầng 6: Tác Tử AI Tự Hành (AI Supply Chain Agent - Module 13)</div>
+                                <div class="layer-sub">Phân tích chuỗi thời gian, dự báo nhu cầu đa điểm và tự động lập kế hoạch đặt hàng</div>
+                            </div>
+                        </div>
+                        <span class="tag" style="background: var(--rose-light); color: var(--rose);">Gemini 2.5 Flash + Python Sidecar</span>
+                    </div>
+                    <div class="component-grid">
+                        <div class="comp-card">
+                            <div class="comp-title"><span>📊</span> Pipeline Trích Xuất Dữ Liệu (ETL)</div>
+                            <div class="comp-desc">Gọi REST API lấy lịch sử bán hàng theo ngày từ POS, số lượng tồn kho khả dụng từ bảng <code>Bin</code> và thời gian giao hàng (Lead Time) của từng NCC.</div>
+                            <div class="comp-tags"><span class="tag">REST Client</span><span class="tag">Pandas Dataframe</span></div>
+                        </div>
+                        <div class="comp-card">
+                            <div class="comp-title"><span>🌦️</span> Nạp Yếu Tố Ngoại Cảnh</div>
+                            <div class="comp-desc">Bộ biến số thực tế: Lịch lễ Tết Nguyên Đán, sự kiện Black Friday, biến động thời tiết (đợt rét tại Hà Nội, mùa mưa tại TP.HCM), chiến dịch khuyến mãi.</div>
+                            <div class="comp-tags"><span class="tag">Seasonality</span><span class="tag">Weather API</span></div>
+                        </div>
+                        <div class="comp-card">
+                            <div class="comp-title"><span>📈</span> Thuật Toán Dự Báo Nhu Cầu</div>
+                            <div class="comp-desc">Tính nhu cầu trung bình ngày (ADD), điểm đặt hàng lại (ROP) và tồn an toàn (Safety Stock). Tự động quy đổi thành phẩm ra nguyên vật liệu qua định mức BOM.</div>
+                            <div class="comp-tags"><span class="tag">ROP Math</span><span class="tag">BOM Explosion</span></div>
+                        </div>
+                        <div class="comp-card">
+                            <div class="comp-title"><span>🧠</span> Tác Tử Gemini Ra Quyết Định (Tool Calling)</div>
+                            <div class="comp-desc">Gemini đánh giá nguy cơ đứt hàng. Nếu tồn &lt; ROP, tự động kích hoạt công cụ tạo bản nháp <strong>Material Request / Purchase Order</strong> trên ERPNext kèm giải trình.</div>
+                            <div class="comp-tags"><span class="tag">Explainable AI</span><span class="tag">Draft PO Auto-Creation</span></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TAB 2: KIẾN TRÚC LÕI FRAPPE FRAMEWORK -->
+        <div id="tab2" class="tab-content">
+            <div class="section-intro">
+                <h2><span>⚙️</span> Đi Sâu Vào Cơ Chế Hoạt Động Của Frappe Framework Core</h2>
+                <p>Frappe Framework là nền tảng Full-stack Python & JS xây dựng theo mô hình kiến trúc điều khiển bằng siêu dữ liệu <strong>(Metadata-driven Architecture)</strong>. Mọi thực thể nghiệp vụ (Kho, Hàng hóa, Đơn hàng) đều được định nghĩa thông qua khái niệm trung tâm là <strong>DocType</strong>.</p>
+            </div>
+
+            <div class="component-grid" style="margin-bottom: 24px;">
+                <div class="comp-card" style="background: white;">
+                    <div class="comp-title"><span>🐍</span> 1. Web Application Server (Gunicorn)</div>
+                    <div class="comp-desc">
+                        Chạy trên Python 3.11+, sử dụng mô hình Gthread worker với 2 workers và 4 threads xử lý đồng thời các HTTP Request từ trình duyệt và API. Mọi request đều khởi tạo một ngữ cảnh cục bộ <code>frappe.local</code> chứa thông tin phiên làm việc, người dùng đăng nhập và kết nối CSDL riêng biệt.
+                    </div>
+                </div>
+                <div class="comp-card" style="background: white;">
+                    <div class="comp-title"><span>📡</span> 2. Realtime Event Server (Node.js Socket.IO)</div>
+                    <div class="comp-desc">
+                        Được viết bằng Node.js, lắng nghe kênh Redis Pub/Sub. Khi bất kỳ chứng từ nào trong ERPNext được tạo hoặc cập nhật (ví dụ: Thu ngân bấm thanh toán hóa đơn POS), Frappe đẩy một thông báo vào Redis, Socket.IO lập tức bắn tín hiệu về màn hình quản trị của Quản lý chuỗi ngay tức khắc.
+                    </div>
+                </div>
+                <div class="comp-card" style="background: white;">
+                    <div class="comp-title"><span>⏱️</span> 3. Bộ Lập Lịch Định Kỳ (Frappe Scheduler)</div>
+                    <div class="comp-desc">
+                        Thay thế cronjob truyền thống của Linux. Scheduler chạy nền mỗi phút kiểm tra bảng <code>Scheduled Job Type</code> để kích hoạt các tác vụ: tính toán tồn kho cuối ngày, kiểm tra hạn sử dụng các lô bánh, gửi email báo cáo doanh thu tự động cho quản lý mỗi 22h đêm.
+                    </div>
+                </div>
+                <div class="comp-card" style="background: white;">
+                    <div class="comp-title"><span>👷</span> 4. Công Nhân Xử Lý Ngầm (Background RQ Workers)</div>
+                    <div class="comp-desc">
+                        Được chia làm 3 phân luồng độc lập:
+                        <br>• <strong>Short:</strong> Gửi thông báo, cập nhật cache (dưới 5 giây).
+                        <br>• <strong>Default:</strong> Tính toán lại giá thành, lập phiếu kho.
+                        <br>• <strong>Long:</strong> Đồng bộ dữ liệu lớn, chạy báo cáo tài chính hàng quý hoặc chạy script mô phỏng lịch sử giao dịch.
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-intro">
+                <h2><span>📜</span> Mô Hình "Everything is a DocType" Trong Frappe</h2>
+                <p>Khác với các framework truyền thống (như Django hay Spring Boot phải viết tay Model, Migration, Controller, UI View riêng), trong Frappe:</p>
+                <ul class="feature-list" style="margin-top: 14px;">
+                    <li class="feature-item">
+                        <span class="feature-icon">✔</span>
+                        <div><strong>JSON Schema là gốc:</strong> Khi tạo DocType <code>Warehouse</code>, Frappe lưu một file JSON mô tả cấu trúc trường (warehouse_name, parent_warehouse, is_group).</div>
+                    </li>
+                    <li class="feature-item">
+                        <span class="feature-icon">✔</span>
+                        <div><strong>Tự động tạo bảng SQL:</strong> Frappe ORM tự đọc file JSON và thực thi câu lệnh <code>CREATE TABLE tabWarehouse</code> tương ứng trong MariaDB mà lập trình viên không cần viết lệnh SQL tạo bảng.</div>
+                    </li>
+                    <li class="feature-item">
+                        <span class="feature-icon">✔</span>
+                        <div><strong>Tự sinh giao diện và API:</strong> Ngay lập tức người dùng có giao diện Form nhập liệu, danh sách List view, cây phân cấp Tree view và toàn bộ bộ REST API <code>/api/resource/Warehouse</code> mà không tốn thêm 1 dòng code nào.</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- TAB 3: KẾT NỐI CƠ SỞ DỮ LIỆU & MULTI-TENANCY -->
+        <div id="tab3" class="tab-content">
+            <div class="section-intro">
+                <h2><span>🗄️</span> Đi Sâu Vào Cơ Chế Kết Nối CSDL MariaDB & Kiến Trúc Multi-Tenancy</h2>
+                <p>Tìm hiểu cách thức Python kết nối vào MariaDB qua thư viện mysqlclient, quản lý pool kết nối, ánh xạ ORM và cách phân vùng dữ liệu an toàn cho từng khách hàng (Multi-tenant Architecture).</p>
+            </div>
+
+            <!-- MULTI-TENANCY EXPLANATION -->
+            <div class="layer-box" style="margin-bottom: 24px; border-left: 4px solid var(--emerald);">
+                <h3 style="font-size: 18px; font-weight: 800; color: var(--emerald); margin-bottom: 8px;">1. Cơ Chế Multi-Tenancy Dựa Trên Site (Site-Based Isolation)</h3>
+                <p style="font-size: 14px; margin-bottom: 14px;">Mỗi dự án trên Frappe Bench quản lý một thư mục <code>sites/</code>. Mỗi thư mục con đại diện cho một Site độc lập (trong dự án của chúng ta là site <code>frontend</code>):</p>
+                
+                <div class="code-block">
+<span class="code-comment"># Nội dung file /home/frappe/frappe-bench/sites/frontend/site_config.json</span>
+{
+    <span class="code-keyword">"db_name"</span>: <span class="code-string">"_b7b120c781aea689"</span>,        <span class="code-comment">// Tên Database riêng biệt trong MariaDB</span>
+    <span class="code-keyword">"db_user"</span>: <span class="code-string">"_b7b120c781aea689"</span>,        <span class="code-comment">// Tài khoản truy cập chỉ xem được DB này</span>
+    <span class="code-keyword">"db_password"</span>: <span class="code-string">"JnYokH3TaOlGsISW"</span>,    <span class="code-comment">// Mật khẩu kết nối ngẫu nhiên bảo mật cao</span>
+    <span class="code-keyword">"db_type"</span>: <span class="code-string">"mariadb"</span>,
+    <span class="code-keyword">"installed_apps"</span>: [<span class="code-string">"frappe"</span>, <span class="code-string">"erpnext"</span>]
+}
+                </div>
+                <p style="font-size: 13px; color: var(--text-muted);">
+                    <strong>Nguyên lý kết nối:</strong> Khi có HTTP Request đến với Hostname là <code>frontend</code>, Nginx gửi header <code>X-Frappe-Site-Name: frontend</code>. Framework sẽ tự đọc file config trên, mở kết nối an toàn vào đúng cơ sở dữ liệu của site đó. Điều này đảm bảo không có bất kỳ khả năng rò rỉ dữ liệu chéo giữa các site khác nhau.
+                </p>
+            </div>
+
+            <!-- ORM & TABLE MAPPING -->
+            <div class="db-schema-card" style="margin-bottom: 24px;">
+                <div class="db-schema-header">
+                    <span>Ánh Xạ Từ Thực Thể DocType Sang Bảng Vật Lý MariaDB (InnoDB)</span>
+                    <span class="tag" style="background: white;">Table Prefix: tab</span>
+                </div>
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Khái Niệm Nghiệp Vụ</th>
+                            <th>Tên DocType (Metadata)</th>
+                            <th>Tên Bảng Vật Lý Trong MariaDB</th>
+                            <th>Mục Đích & Ràng Buộc</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Kho hàng vật lý</strong></td>
+                            <td><code>Warehouse</code></td>
+                            <td><code>tabWarehouse</code></td>
+                            <td>Lưu 10 kho chuỗi FLORA. Quản lý dạng cây Nested Set (lft, rgt).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tồn kho thời gian thực</strong></td>
+                            <td><code>Bin</code></td>
+                            <td><code>tabBin</code></td>
+                            <td>Chứa <code>actual_qty</code>, <code>ordered_qty</code>, <code>reserved_qty</code> theo cặp (Item, Warehouse).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sổ cái kho (Lịch sử)</strong></td>
+                            <td><code>Stock Ledger Entry</code></td>
+                            <td><code>tabStock Ledger Entry</code></td>
+                            <td>Ghi bất biến (Immutable ledger). Bất kỳ lần nhập/xuất kho nào đều tạo dòng mới.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hóa đơn bán lẻ POS</strong></td>
+                            <td><code>POS Invoice</code></td>
+                            <td><code>tabPOS Invoice</code></td>
+                            <td>Lưu thông tin ca, khách hàng, tổng tiền, thuế, phương thức thanh toán.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Chi tiết sản phẩm POS</strong></td>
+                            <td><code>POS Invoice Item</code></td>
+                            <td><code>tabPOS Invoice Item</code></td>
+                            <td>Bảng con (Child table), liên kết khóa ngoại với bảng cha qua <code>parent</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Định mức nguyên liệu</strong></td>
+                            <td><code>BOM</code></td>
+                            <td><code>tabBOM</code> & <code>tabBOM Item</code></td>
+                            <td>Công thức chế biến 18 món bánh: Bột mì, sữa, bơ, cà phê hạt,...</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Đơn mua hàng đề xuất</strong></td>
+                            <td><code>Purchase Order</code></td>
+                            <td><code>tabPurchase Order</code></td>
+                            <td>Lưu đơn hàng do AI Agent tạo ra ở trạng thái Draft (docstatus = 0).</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PYTHON CODE EXECUTION CYCLE -->
+            <div class="section-intro">
+                <h2><span>🔄</span> Vòng Đời Kết Nối CSDL Trong Một Request (Connection Lifecycle)</h2>
+                <div class="code-block">
+<span class="code-comment"># Cách Frappe quản lý kết nối CSDL trong mã nguồn Python (frappe/database/mariadb)</span>
+
+<span class="code-keyword">def</span> <span class="code-func">handle_request</span>(request):
+    <span class="code-comment"># 1. Khởi tạo ngữ cảnh Site từ Header HTTP</span>
+    frappe.init(site=<span class="code-string">"frontend"</span>)
+    
+    <span class="code-comment"># 2. Mở kết nối Database qua MySQLClient Driver (nếu chưa có trong Pool)</span>
+    frappe.connect() 
+    
+    <span class="code-keyword">try</span>:
+        <span class="code-comment"># 3. Thực thi nghiệp vụ qua ORM (Tự động chuyển thành SQL SELECT/INSERT)</span>
+        item = frappe.get_doc(<span class="code-string">"Item"</span>, <span class="code-string">"BANH-CROISSANT"</span>)
+        
+        <span class="code-comment"># 4. Cam kết giao dịch (Transaction Commit) bảo đảm tính toàn vẹn ACID</span>
+        frappe.db.commit()
+    <span class="code-keyword">except</span> Exception <span class="code-keyword">as</span> e:
+        <span class="code-comment"># 5. Khôi phục trạng thái nếu có lỗi (Rollback) ngăn chặn dữ liệu rác</span>
+        frappe.db.rollback()
+        <span class="code-keyword">raise</span> e
+    <span class="code-keyword">finally</span>:
+        <span class="code-comment"># 6. Đóng kết nối hoặc trả về Connection Pool để tái sử dụng</span>
+        frappe.destroy()
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: LUỒNG TÍCH HỢP AI AGENT -->
+        <div id="tab4" class="tab-content">
+            <div class="section-intro">
+                <h2><span>🤖</span> Cơ Chế Tác Tử AI Tự Hành (AI Supply Chain Agent Workflow)</h2>
+                <p>Chi tiết luồng hoạt động khép kín giữa AI Service Account, mô hình ngôn ngữ lớn (Gemini), cơ chế gọi công cụ (Tool Calling) và tạo chứng từ tự động trên ERPNext.</p>
+            </div>
+
+            <div class="architecture-grid">
+                <div class="layer-box" style="border-top: 4px solid var(--rose);">
+                    <div class="component-grid">
+                        <div class="comp-card" style="background: white;">
+                            <div class="comp-title"><span>👀</span> Bước 1: Agent Quan Sát (Observe)</div>
+                            <div class="comp-desc">
+                                AI Service dùng Token HTTP gọi API:
+                                <br>• <code>GET /api/resource/Bin</code>: Lấy tồn kho hiện có của 8 cửa hàng và bếp.
+                                <br>• <code>GET /api/resource/POS Invoice Item</code>: Lấy số lượng bánh & nước bán được trong 30 ngày qua.
+                                <br>• <code>GET /api/resource/Purchase Order?docstatus=0</code>: Lấy các đơn hàng đang giao chưa về kho.
+                            </div>
+                        </div>
+
+                        <div class="comp-card" style="background: white;">
+                            <div class="comp-title"><span>🧠</span> Bước 2: Phân Tích & Dự Báo (Reason)</div>
+                            <div class="comp-desc">
+                                • Tính tốc độ tiêu thụ trung bình ngày (ADD).
+                                <br>• Nạp yếu tố ngoại cảnh: Lễ Tết sắp tới, dự báo thời tiết lạnh ở Hà Nội (nhu cầu cà phê nóng tăng 40%), mùa mưa ở HCM.
+                                <br>• Tính điểm đặt hàng lại: <code>ROP = (Lead Time × ADD) + Tồn an toàn</code>.
+                                <br>• Phân rã nguyên vật liệu cần mua bằng định mức BOM.
+                            </div>
+                        </div>
+
+                        <div class="comp-card" style="background: white;">
+                            <div class="comp-title"><span>✍️</span> Bước 3: Tự Động Ra Quyết Định (Act)</div>
+                            <div class="comp-desc">
+                                Gemini kích hoạt công cụ Function Calling:
+                                <br>• Gọi hàm <code>create_draft_purchase_order(...)</code>.
+                                <br>• Gửi HTTP <code>POST /api/resource/Purchase Order</code> với trạng thái <code>docstatus = 0</code> (Bản nháp).
+                                <br>• Đính kèm phần giải trình lý do rõ ràng của AI vào trường ghi chú chứng từ.
+                            </div>
+                        </div>
+
+                        <div class="comp-card" style="background: white;">
+                            <div class="comp-title"><span>👤</span> Bước 4: Con Người Duyệt (Human-in-the-Loop)</div>
+                            <div class="comp-desc">
+                                • Nhân viên mua hàng hoặc Quản lý chuỗi mở ERPNext lên $\rightarrow$ Thấy thông báo có 1 bản nháp Đơn mua hàng mới do AI lập.
+                                <br>• Người quản lý xem lý do giải trình của AI, kiểm tra số lượng và bấm nút <strong>Submit (Duyệt)</strong>.
+                                <br>• Đơn hàng chính thức được gửi cho Nhà cung cấp.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-intro" style="margin-top: 24px;">
+                <h2><span>🛡️</span> 3 Rào Chắn An Toàn Đảm Bảo AI Không Gây Lỗi Hệ Thống</h2>
+                <div class="component-grid" style="margin-top: 14px;">
+                    <div class="comp-card">
+                        <div class="comp-title"><span>🔒</span> 1. Quyền Hạn Tối Thiểu (Principle of Least Privilege)</div>
+                        <div class="comp-desc">Tài khoản AI Service chỉ được cấp quyền đọc và quyền tạo bản nháp (Draft). Tuyệt đối không cấp quyền Duyệt (Submit) hay quyền Xóa chứng từ (Delete).</div>
+                    </div>
+                    <div class="comp-card">
+                        <div class="comp-title"><span>📐</span> 2. Không Bịa Đặt Số Liệu (Zero Hallucination)</div>
+                        <div class="comp-desc">Mọi công thức tính ROP, tồn kho an toàn, quy đổi BOM đều được viết bằng mã Python toán học xác định. Mô hình LLM chỉ đóng vai trò phân tích ngữ cảnh và xâu chuỗi gọi hàm.</div>
+                    </div>
+                    <div class="comp-card">
+                        <div class="comp-title"><span>📝</span> 3. Truy Vết Minh Bạch (Audit Trail)</div>
+                        <div class="comp-desc">Mọi đơn hàng do AI tạo ra đều được lưu nhật ký thay đổi với tên người tạo <code>ai_service@erpnet.vn</code> và kèm văn bản giải trình lý do tính toán để con người đối chứng.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Deactivate all buttons
+            const btns = document.querySelectorAll('.tab-btn');
+            btns.forEach(btn => btn.classList.remove('active'));
+
+            // Activate chosen tab
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>
