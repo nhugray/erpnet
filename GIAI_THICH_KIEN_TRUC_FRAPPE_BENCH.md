@@ -1,162 +1,244 @@
-# Tài Liệu Giải Thích Chi Tiết Kiến Trúc Frappe Bench
-*(Dành cho Frappe Framework & ERPNext)*
+# Hướng Dẫn Kỹ Thuật Toàn Diện: Kiến Trúc Frappe Framework, Frappe Bench & Bản Chất DocType
 
 ---
 
-## 1. Frappe Bench Là Gì?
-
-**Frappe Bench** là một hệ sinh thái quản lý toàn diện dành cho Frappe Framework và ERPNext. Khác với các framework thông thường (như Django, Laravel, Rails - vốn chỉ cung cấp một thư viện mã nguồn và một công cụ dòng lệnh cơ bản), Frappe Bench đóng 3 vai trò cùng lúc:
-
-1. **Bộ công cụ dòng lệnh (CLI Tool - `bench`):** Hỗ trợ tạo site mới, cài đặt ứng dụng, cập nhật cơ sở dữ liệu (`migrate`), sao lưu (`backup`), quản lý tiến trình và chạy script tự động.
-2. **Không gian làm việc cô lập (Workspace / Directory Manager):** Tổ chức mã nguồn đa ứng dụng (**Multi-App**), cấu hình đa người thuê (**Multi-Tenant Sites**), và môi trường ảo Python (**Python Virtualenv**) trong cùng một cấu trúc thư mục tiêu chuẩn.
-3. **Bộ điều phối dịch vụ phụ trợ (Process Orchestrator):** Tự động sinh cấu hình và giám sát các dịch vụ nền tảng: máy chủ web WSGI (Gunicorn), cổng chuyển tiếp (Nginx), bộ nhớ đệm (Redis), hàng đợi công việc nền (RQ Workers), trình lập lịch tác vụ định kỳ (Scheduler) và truyền thông thời gian thực (Node.js Socket.IO).
+## MỤC LỤC
+1. [Phần 1: Kiến Trúc Hạ Tầng Tổng Quan (Theo Sơ Đồ Tiêu Chuẩn Frappe)](#phần-1-kiến-trúc-hạ-tầng-tổng-quan-theo-sơ-đồ-tiêu-chuẩn-frappe)
+2. [Phần 2: Kiến Trúc Chi Tiết & Cơ Chế Vận Hành Runtime Của Frappe Bench](#phần-2-kiến-trúc-chi-tiết--cơ-chế-vận-hành-runtime-của-frappe-bench)
+3. [Phần 3: DocType Là Gì? Dùng Để Làm Gì? Kết Nối Với Cơ Sở Dữ Liệu Như Thế Nào?](#phần-3-doctype-là-gì-dùng-để-làm-gì-kết-nối-với-cơ-sở-dữ-liệu-như-thế-nào)
+4. [Phần 4: Sơ Đồ Toàn Diện Về Vòng Đời & Cách Hoạt Động Của DocType](#phần-4-sơ-đồ-toàn-diện-về-vòng-đời--cách-hoạt-động-của-doctype)
 
 ---
 
-## 2. Giải Phẫu Cấu Trúc Thư Mục `frappe-bench`
+## PHẦN 1: KIẾN TRÚC HẠ TẦNG TỔNG QUAN (THEO SƠ ĐỒ TIÊU CHUẨN FRAPPE)
 
-Khi một Bench được khởi tạo, toàn bộ hệ thống nằm gọn trong thư mục gốc (thường là `/home/frappe/frappe-bench/` hoặc đường dẫn do người quản trị chỉ định). Cấu trúc gồm 5 thành phần xương sống:
+Kiến trúc chuẩn của hệ sinh thái Frappe được xây dựng theo mô hình kim tự tháp 5 tầng từ phần cứng, hệ điều hành lên tới giao diện người dùng:
 
 ```text
-frappe-bench/
-├── apps/                         # Nơi chứa mã nguồn các ứng dụng Python / JS
-│   ├── frappe/                  # Framework cốt lõi (Core Engine)
-│   ├── erpnext/                 # Ứng dụng quản trị doanh nghiệp chuẩn
-│   └── custom_app/              # Ứng dụng tự phát triển độc lập
-│
-├── sites/                        # Vùng dữ liệu đa người thuê (Multi-Tenancy)
-│   ├── common_site_config.json  # Cấu hình dùng chung của toàn bộ Bench
-│   ├── apps.txt                 # Danh sách các app được nạp vào Bench
-│   ├── assets/                  # Symlinks trỏ tới file tĩnh (CSS/JS) của các app
-│   └── [site_name]/             # Thư mục riêng của từng Site (Tenant)
-│       ├── site_config.json     # Cấu hình CSDL, mật khẩu DB, mã hóa của Site
-│       ├── public/files/        # Tệp đính kèm công khai (không cần đăng nhập)
-│       ├── private/files/       # Tệp chứng từ nhạy cảm (bắt buộc xác thực)
-│       └── locks/               # Khóa trạng thái scheduler / migration
-│
-├── env/                          # Môi trường ảo Python (Virtual Environment)
-│   ├── bin/python               # Trình thông dịch Python chuẩn của Bench
-│   ├── bin/gunicorn             # Web Server WSGI
-│   └── lib/python3.x/           # Thư viện phụ thuộc (pip packages)
-│
-├── config/                       # Tệp cấu hình dịch vụ do Bench tự sinh
-│   ├── nginx.conf               # Cấu hình Web Server Nginx
-│   ├── supervisor.conf          # Cấu hình giám sát tiến trình hệ thống
-│   ├── redis_cache.conf         # Cấu hình Redis Cache
-│   ├── redis_queue.conf         # Cấu hình Redis Queue
-│   └── redis_socketio.conf      # Cấu hình Redis Socket.IO
-│
-└── logs/                         # Nhật ký ghi nhận hoạt động và lỗi
-    ├── frappe.log               # Nhật ký xử lý ngoại lệ và ứng dụng
-    ├── web.log / web.error.log  # Nhật ký truy cập HTTP qua Gunicorn
-    ├── worker.log               # Nhật ký tiến trình nền RQ Worker
-    └── schedule.log             # Nhật ký kích hoạt tác vụ định kỳ
+ ┌────────────────────────────────────────────────────────┐   ┌─────────────────┐
+ │               Viewing IO Interface                     │◄──┤  Request Queue  │
+ │  ┌────────────────────────┐  ┌──────────────────────┐  │   │     (Clock)     │
+ │  │      Desktop UI        │  │      Mobile UI       │  │   └────────┬────────┘
+ │  └────────────────────────┘  └──────────────────────┘  │            │
+ └───────────────────────────▲────────────────────────────┘            │
+                             │ start (bench start)                     │
+ ┌───────────────────────────┴─────────────────────────────────────────┴────────┐
+ │                                                                              │
+ │  ┌──────────────────────┐  ┌────────────────────────┐  ┌──────────────────┐  │
+ │  │ Configuration Layer  │  │   Multi-Tenant Layer   │  │ Scheduling Layer │  │
+ │  │                      │  │                        │  │                  │  │
+ │  │  [nginx.conf]        │  │  ┌──────────────────┐  │  │  [jobs queue]    │  │
+ │  │  [supervisor.conf]   │  │  │ bench-instance-1 │  │  │  ■ ■ ■ ■ ■ ■ ■   │  │
+ │  │  [redis.conf]        │  │  │ sites (yellow)   │  │  │  ■ ■ ■ ■ ■ ■ ■   │  │
+ │  │  [site_config.json]  │  │  │ apps: frappe/erp │  │  │  ■ ■ ■ ■ ■ ■ ■   │  │
+ │  │                      │  │  └──────────────────┘  │  │                  │  │
+ │  └──────────┬───────────┘  └───────────▲────────────┘  └────────▲─────────┘  │
+ │             │ setup, config            │                        │            │
+ └─────────────┼──────────────────────────┼────────────────────────┼────────────┘
+               │                          │ new-site, install-app  │ enable-sched
+ ┌─────────────┴──────────────────────────┴────────────────────────┴────────────┐
+ │  Prerequisites:  [mariadb]   [nodejs]   [nginx]   [wkhtmltopdf]  [fail2ban]  │
+ └────────────────────────────────────────▲─────────────────────────────────────┘
+                                          │ install
+ ┌────────────────────────────────────────┴─────────────────────────────────────┐
+ │  bench CLI                             (pip install frappe-bench)            │
+ └────────────────────────────────────────▲─────────────────────────────────────┘
+                                          │
+ ┌────────────────────────────────────────┴─────────────────────────────────────┐
+ │  Dependencies:                         GIT, Python, PIP                      │
+ └────────────────────────────────────────▲─────────────────────────────────────┘
+                                          │
+ ┌────────────────────────────────────────┴─────────────────────────────────────┐
+ │  *nix OS Layer:                        Linux, Mac OS X, FreeBSD, Docker      │
+ └──────────────────────────────────────────────────────────────────────────────┘
 ```
+
+### 1.1. Tầng Hệ Điều Hành (*nix OS Layer) & Dependencies
+* **Hệ điều hành cơ sở:** Hoạt động tối ưu trên các nền tảng nhân Unix (Ubuntu, Debian, CentOS, macOS) hoặc được đóng gói trong các Container Linux qua Docker.
+* **Các gói phụ thuộc cốt lõi:**
+  * `Git`: Quản lý phiên bản mã nguồn của từng ứng dụng (`apps/frappe`, `apps/erpnext`).
+  * `Python (>= 3.10)`: Ngôn ngữ nền tảng xử lý toàn bộ logic máy chủ, ORM, bảo mật.
+  * `PIP`: Trình quản lý thư viện Python để cài đặt Bench và các package cần thiết.
+
+### 1.2. Tầng Công Cụ Bench CLI (`bench`)
+* Được cài đặt thông qua lệnh: `pip install frappe-bench`.
+* Đóng vai trò là "Tổng tư lệnh" điều khiển: bench tải ứng dụng, cài đặt CSDL, kích hoạt cron, cấu hình reverse proxy và giám sát tiến trình.
+
+### 1.3. Tầng Dịch Vụ Nền Tảng (Prerequisites)
+Được Bench tự động tương tác và thiết lập thông qua lệnh `bench setup prerequisites`:
+1. **MariaDB:** Cơ sở dữ liệu quan hệ lưu trữ thực thể (InnoDB, utf8mb4, dynamic row format).
+2. **Node.js (kèm npm/yarn):** Biên dịch tài nguyên giao diện Desk (Javascript, CSS bundling qua Vite/Rollup) và chạy Socket.IO server.
+3. **Nginx:** Cổng đón nhận (Web Server & Reverse Proxy) điều phối tên miền đa site và phục vụ file tĩnh.
+4. **Wkhtmltopdf:** Thư viện chuyển đổi giao diện HTML/CSS thành bản in PDF chuẩn (hóa đơn, phiếu kho, đơn hàng).
+5. **Fail2ban:** Tự động chặn các IP dò quét mật khẩu đăng nhập bất thường.
+
+### 1.4. Tầng Cấu Hình (Configuration Layer)
+* Bench tự động sinh ra các file cấu hình tương thích từ cấu trúc thư mục mà không cần quản trị viên chỉnh sửa thủ công:
+  * `config/nginx.conf`: Tự động nhận diện danh sách domain của các site để mở Virtual Host.
+  * `config/supervisor.conf`: Cấu hình danh sách tiến trình nền cần chạy liên tục.
+  * `sites/[site]/site_config.json`: Thông số kết nối DB và khóa bảo mật riêng của từng tenant.
+
+### 1.5. Tầng Đa Người Thuê (Multi-Tenant Layer)
+* Cho phép một máy chủ chạy cùng lúc nhiều **Bench Instance**.
+* Mỗi Bench Instance lại phục vụ nhiều **Sites** độc lập (mỗi ô vuông màu vàng là một site/CSDL riêng).
+* Các site chia sẻ chung các ứng dụng mã nguồn:
+  * **Frappe (Đỏ):** Lõi framework.
+  * **ERPNext (Xanh dương):** Ứng dụng nghiệp vụ chuẩn.
+  * **Frappe App (Xanh ngọc):** Các module hoặc ứng dụng tùy biến độc lập.
+
+### 1.6. Tầng Lập Lịch & Hàng Đợi (Scheduling Layer & Request Queue)
+* Quản lý các công việc (Jobs) chạy định kỳ hoặc ngầm.
+* Lệnh điều phối: `bench enable-scheduler`, `bench doctor`, `bench purge-jobs`.
+* Đồng bộ trực tiếp với **Request Queue** và **Viewing IO Interface** để đảm bảo người dùng giao diện Desk luôn nhận được phản hồi mượt mà trong khi các việc nặng vẫn chạy ngầm.
 
 ---
 
-## 3. Cơ Chế Đa Người Thuê (Multi-Tenancy) Của Frappe Bench
+## PHẦN 2: KIẾN TRÚC CHI TIẾT & CƠ CHẾ VẬN HÀNH RUNTIME CỦA FRAPPE BENCH
 
-Một ưu điểm kiến trúc vượt trội của Frappe Bench là khả năng phục vụ **nhiều Site (nhiều khách hàng/doanh nghiệp)** trên **cùng một nền tảng mã nguồn duy nhất**:
+Khi hệ thống vận hành thực tế (chạy qua `bench start` hoặc trong Docker/Production), các tiến trình phối hợp theo luồng nghiệp vụ sau:
 
 ```
-                       ┌─── Domain: congty-a.vn ───► Database: _db_congty_a
-                       │
-Mã Nguồn (apps/) ──────┼─── Domain: congty-b.com ──► Database: _db_congty_b
-                       │
-                       └─── Domain: test.local ────► Database: _db_test
+[Người dùng / Web Browser / REST Client]
+                  │
+                  ▼ (Port 80/443/8080)
+           ┌──────────────┐
+           │ Nginx Proxy  │
+           └──────┬───────┘
+                  │
+        ┌─────────┴───────────────────────┐
+        │                                 │
+   (File tĩnh)                       (Request động)
+        ▼                                 ▼
+[/assets/, /files/]             ┌───────────────────┐
+Trả thẳng từ đĩa                │ Gunicorn (Port 8000)│
+                                └─────────┬─────────┘
+                                          │ frappe.init(site)
+                                          ▼
+                                ┌───────────────────┐
+                                │   Frappe ORM      │
+                                └────┬────┬────┬────┘
+                                     │    │    │
+            ┌────────────────────────┘    │    └───────────────────────┐
+            ▼                             ▼                            ▼
+   ┌─────────────────┐           ┌─────────────────┐          ┌─────────────────┐
+   │   Redis Cache   │           │   Redis Queue   │          │ MariaDB Schema  │
+   │ DocType & Perms │           │  (RQ Job Push)  │          │  tab[DocType]   │
+   └─────────────────┘           └────────┬────────┘          └─────────────────┘
+                                          │
+                                          ▼
+                                 ┌─────────────────┐
+                                 │   RQ Workers    │
+                                 │ (short/def/long)│
+                                 └─────────────────┘
 ```
 
-### Cơ chế hoạt động:
-* **Nhận diện Site (Site Resolution):**
-  * Khi người dùng truy cập qua trình duyệt, Nginx chuyển tiếp header `Host: congty-a.vn` vào Gunicorn.
-  * Frappe đọc header này, đối chiếu tên miền với danh mục thư mục trong `sites/` để nạp đúng cấu hình `sites/congty-a.vn/site_config.json`.
-  * Khi gọi qua lệnh CLI, cờ `--site <tên_site>` đóng vai trò chỉ định Site đích.
-* **Cách ly dữ liệu hoàn toàn:**
-  * Mỗi Site sở hữu một CSDL MariaDB/PostgreSQL riêng biệt với thông tin tài khoản truy cập khác nhau.
-  * Tệp tải lên (ảnh, PDF, hợp đồng) được lưu tại thư mục `sites/<site>/public/` và `sites/<site>/private/`, không thể bị truy cập chéo giữa các Site.
+1. **Phân tách tĩnh - động tại Nginx:** Nginx kiểm tra URI. Nếu là ảnh, CSS, JS (`/assets/*`, `/files/*`), Nginx trả về ngay lập tức với tốc độ mili-giây mà không đánh thức tiến trình Python.
+2. **Giao tiếp WSGI Gunicorn:** Các yêu cầu dữ liệu hoặc giao diện Desk được chuyển tới Gunicorn. Gunicorn gọi `frappe.app.application`, nạp đúng database của Site tương ứng qua HTTP Host Header.
+3. **Bộ 3 Cụm Redis (Redis Triad):**
+   * **Redis Cache:** Nạp toàn bộ metadata của DocType và phân quyền người dùng vào RAM. Nhờ đó, việc kiểm tra quyền truy cập không phải thực hiện các câu lệnh `SELECT` xuống ổ cứng.
+   * **Redis Queue:** Nhận các tác vụ tính toán lớn, gửi email hoặc đồng bộ CSDL từ web worker để chuyển tiếp cho Background Workers.
+   * **Redis SocketIO:** Kênh Pub/Sub kết nối với Node.js để bắn thông báo chuông (Bell Notification) hoặc khóa tài liệu khi có 2 người cùng mở 1 form.
+4. **Hàng đợi RQ Workers:** Chạy thường trực dưới nền theo 3 luồng: `short` (dưới 5 phút), `default` và `long` (các tác vụ nặng hàng giờ).
 
 ---
 
-## 4. Kiến Trúc Tiến Trình Runtime (Runtime Process Architecture)
+## PHẦN 3: DOCTYPE LÀ GÌ? DÙNG ĐỂ LÀM GÌ? KẾT NỐI VỚI CƠ SỞ DỮ LIỆU NHƯ THẾ NÀO?
 
-Hệ thống vận hành của Frappe Bench là sự kết hợp nhịp nhàng giữa 6 phân lớp dịch vụ:
+### 3.1. DocType Là Gì?
+Trong Frappe Framework, **DocType (Document Type)** là khái niệm trung tâm quan trọng nhất. 
+> **"DocType is the Single Source of Truth"** (DocType là nguồn chân lý duy nhất).
 
-### 4.1. Cổng Đón Nhận (Reverse Proxy - Nginx)
-* Lắng nghe tại cổng tiêu chuẩn (80 / 443 hoặc cổng tùy biến như 8080).
-* Phục vụ trực tiếp tài nguyên tĩnh (`/assets/*`, `/files/*`) mà không cần chuyển tiếp vào Python, giúp giải phóng tải CPU.
-* Định tuyến lưu lượng động: Các yêu cầu API và giao diện Desk (`/app/*`, `/api/*`) được chuyển qua Gunicorn; các kết nối WebSocket thời gian thực được đẩy qua Node.js Socket.IO.
+DocType là một khối **Siêu dữ liệu (Metadata)** đặc tả toàn bộ vòng đời của một thực thể nghiệp vụ:
+* Nó vừa là **Schema CSDL** (mô tả bảng và các cột).
+* Nó vừa là **Giao diện nhập liệu (UI Form & List View)**.
+* Nó vừa là **Quy tắc bảo mật & phân quyền (Role-Based Access Control)**.
+* Nó vừa là **Đặc tả REST API**.
 
-### 4.2. Máy Chủ Ứng Dụng WSGI (Gunicorn Web Server)
-* Chạy bằng trình thông dịch bên trong `env/bin/gunicorn`, lắng nghe tại cổng nội bộ 8000.
-* Nạp hàm ứng dụng Python `frappe.app.application`.
-* Điều phối nhiều luồng xử lý (Workers) chạy song song để giải quyết các yêu cầu HTTP đồng thời.
+### 3.2. DocType Dùng Để Làm Gì?
+Thay vì kiến trúc truyền thống nơi lập trình viên phải:
+1. Viết mã tạo bảng SQL (`CREATE TABLE`).
+2. Viết class Model ORM.
+3. Viết Form nhập liệu HTML/JS.
+4. Viết các hàm Controller CRUD.
+5. Viết Endpoint REST API và code phân quyền.
 
-### 4.3. Máy Chủ Sự Kiện Thời Gian Thực (Node.js Socket.IO Server)
-* Lắng nghe tại cổng nội bộ 9000 (`socketio.js`).
-* Đảm nhận kết nối 2 chiều liên tục (Full-duplex WebSocket) với trình duyệt người dùng.
-* Ứng dụng: Đẩy thông báo tức thời (Realtime Notifications), hiển thị người dùng đang cùng mở xem một chứng từ (Document Viewers), và khóa chỉnh sửa tránh xung đột dữ liệu.
+👉 **Với Frappe DocType:** Bạn chỉ cần định nghĩa các trường dữ liệu một lần duy nhất trong giao diện Desk (hoặc file JSON). Frappe Framework sẽ tự động sinh ra toàn bộ 5 thành phần trên!
 
-### 4.4. Bộ Ba Cụm Redis (Redis Triad)
-Frappe không dùng chung một cổng Redis cho tất cả tác vụ, mà tách thành 3 cụm riêng biệt để tối ưu hiệu năng và tránh tắc nghẽn bộ nhớ:
-1. **Redis Cache:** Lưu trữ trạng thái phiên làm việc (Session), cấu hình DocType, và quyền hạn người dùng (Permissions). Khi DocType được cập nhật, Bench xóa cache này để áp dụng ngay.
-2. **Redis Queue:** Đóng vai trò là Message Broker (kênh trung chuyển) quản lý hàng đợi cho các tiến trình xử lý ngầm (RQ).
-3. **Redis SocketIO:** Kênh Pub/Sub kết nối giữa Python Backend và Node.js Socket.IO Server để truyền phát sự kiện ra trình duyệt.
+### 3.3. DocType Kết Nối Với Cơ Sở Dữ Liệu MariaDB Như Thế Nào?
 
-### 4.5. Hàng Đợi Công Việc Nền (RQ Background Workers)
-* Xử lý các tác vụ tốn thời gian mà người dùng không thể đợi đồng bộ (như gửi email hàng loạt, xử lý báo cáo kế toán nặng, đồng bộ dữ liệu lớn).
-* Phân thành 3 mức hàng đợi ưu tiên:
-  * `short`: Tác vụ nhanh, hoàn tất dưới 5 phút.
-  * `default`: Tác vụ tiêu chuẩn.
-  * `long`: Tác vụ tính toán kéo dài (tối đa nhiều giờ).
+#### A. Quy Tắc Ánh Xạ Bảng (Table Mapping)
+Mỗi DocType được lưu thành một bảng vật lý trong MariaDB theo cú pháp:
+$$\text{Tên Bảng} = \mathbf{tab} + \text{Tên DocType}$$
 
-### 4.6. Trình Lập Lịch Định Kỳ (Frappe Scheduler)
-* Chạy dưới dạng tiến trình nền liên tục (`bench schedule`).
-* Cứ mỗi phút, Scheduler quét bảng tác vụ và kiểm tra các hàm được khai báo trong `hooks.py` theo các tần suất: `all`, `hourly`, `daily`, `weekly`, `monthly` hoặc biểu thức `cron(...)`.
-* Khi đến hạn, Scheduler tự động đẩy tác vụ đó vào Redis Queue để Background Worker xử lý.
+* *Ví dụ:*
+  * DocType `User` ➔ Bảng `tabUser`
+  * DocType `Purchase Order` ➔ Bảng `tabPurchase Order`
+  * DocType `Item` ➔ Bảng `tabItem`
 
-### 4.7. Tầng Lưu Trữ Quan Hệ (MariaDB / PostgreSQL)
-* Toàn bộ mô hình dữ liệu (DocType) trong Frappe được ánh xạ tự động thành bảng CSDL vật lý có tiền tố `tab` (Ví dụ: `tabUser`, `tabItem`, `tabCustomer`).
-* Đảm bảo tính toán vẹn dữ liệu qua cơ chế giao dịch ACID và khóa dòng (Row-level Locking).
+#### B. Ánh Xạ Kiểu Dữ Liệu (Fieldtype Mapping)
 
----
-
-## 5. Vòng Đời Hoạt Động (Lifecycle) Của Một Tác Vụ Trong Bench
-
-Khi một lệnh CLI được gõ (ví dụ `bench --site site1.local execute my_module.run`) hoặc một yêu cầu HTTP gửi đến API, chuỗi xử lý diễn ra qua 4 bước:
-
-```
-[1. Khởi tạo]            [2. Kết nối CSDL]        [3. Thực thi Logic]       [4. Giải phóng]
-frappe.init(site)   ──►  frappe.connect()   ──►  Controller / Hooks   ──►  frappe.destroy()
-Nạp site_config          Nạp DB Connection        validate() ➔ on_save     commit() / rollback()
-& ngữ cảnh luồng         & Redis Cache            Enqueue background job   Đóng kết nối DB
-```
-
-1. **Khởi tạo ngữ cảnh (`frappe.init(site)`):** Frappe nạp cấu hình của Site được chỉ định, gán biến `frappe.local` chứa thông tin phiên, ngôn ngữ và múi giờ.
-2. **Mở kết nối (`frappe.connect()`):** Mở kết nối chuyên dụng tới CSDL của Site đó và nạp cache từ Redis.
-3. **Thực thi logic nghiệp vụ:** Chạy hàm xử lý, kích hoạt chuỗi sự kiện vòng đời (`validate()`, `before_save()`, `on_submit()`). Nếu có tác vụ ngầm, đẩy vào Redis Queue.
-4. **Cam kết và dọn dẹp (`frappe.destroy()`):** 
-   * Nếu thành công: Gọi `frappe.db.commit()` để lưu dữ liệu vĩnh viễn vào đĩa.
-   * Nếu xảy ra lỗi: Gọi `frappe.db.rollback()` hoàn tác trạng thái ban đầu, ghi log lỗi vào `logs/frappe.log`, sau đó giải phóng kết nối CSDL.
-
----
-
-## 6. Tổng Hợp Các Lệnh Bench Cốt Lõi Trong Thực Tế
-
-| Nhóm Lệnh | Cú Pháp Lệnh | Mục Đích Sử Dụng |
+| Kiểu Trường Trong DocType | Kiểu Cột Vật Lý Trong MariaDB | Ghi Chú Kỹ Thuật |
 | :--- | :--- | :--- |
-| **Quản lý Site** | `bench new-site <site>` | Tạo một Site mới và khởi tạo CSDL MariaDB riêng. |
-| | `bench drop-site <site>` | Xóa hoàn toàn Site và CSDL tương ứng. |
-| **Cài đặt App** | `bench get-app <git-url>` | Clone mã nguồn ứng dụng mới vào thư mục `apps/` và cài vào môi trường `env/`. |
-| | `bench --site <site> install-app <app>` | Cài đặt và di trú bảng của ứng dụng vào Site cụ thể. |
-| **Di trú CSDL** | `bench --site <site> migrate` | So sánh cấu trúc DocType mã nguồn và tự động `ALTER TABLE` cập nhật CSDL. |
-| **Lập trình & Script** | `bench --site <site> execute <path.func>` | Chạy một hàm Python có nạp sẵn toàn bộ ngữ cảnh và kết nối CSDL. |
-| | `bench --site <site> console` | Mở cửa sổ tương tác IPython trực tiếp với CSDL và ORM của Frappe. |
-| **Sao lưu & Phục hồi**| `bench --site <site> backup --with-files` | Xuất file dump CSDL (`.sql.gz`) và toàn bộ file đính kèm. |
-| | `bench --site <site> restore <path.sql.gz>` | Phục hồi lại dữ liệu CSDL từ bản sao lưu. |
-| **Vận hành hệ thống** | `bench start` | Khởi động đồng thời tất cả các tiến trình (trong môi trường phát triển local). |
-| | `bench restart` | Khởi động lại các tiến trình Gunicorn và Worker khi có cập nhật mã nguồn. |
+| **Data, Select, Dynamic Link** | `VARCHAR(140)` hoặc `VARCHAR(255)` | Chuỗi văn bản một dòng, lựa chọn danh sách cố định |
+| **Link** | `VARCHAR(140)` | **Khóa ngoại logic**. Lưu trường `name` của DocType được trỏ tới. Frappe kiểm tra tính toàn vẹn ở tầng ứng dụng. |
+| **Int, Check** | `INT(11)` | Số nguyên, ô chọn boolean (0 hoặc 1). |
+| **Currency, Float, Percent** | `DECIMAL(21, 9)` | Độ chính xác dấu phẩy động tài chính, chống sai số làm tròn tiền tệ. |
+| **Date / Datetime / Time** | `DATE` / `DATETIME(6)` / `TIME(6)` | Thời gian có độ chính xác đến micro-giây. |
+| **Text, Small Text, Code** | `TEXT` / `LONGTEXT` | Khối văn bản dài, ghi chú, mã JSON, mã script. |
+| **Table (Bảng con - Child Table)** | Tạo bảng riêng: `tab[Child DocType]` | Bảng chi tiết liên kết với cha bằng 3 cột: `parent`, `parentfield`, `parenttype`. |
+
+#### C. 7 Cột Hệ Thống Luôn Được Tự Động Tạo
+Trong bất kỳ bảng `tab[DocType]` nào, Frappe luôn tạo sẵn 7 cột quản trị hệ thống:
+1. `name` (`VARCHAR(140)`): Khóa chính (**PRIMARY KEY**), định danh duy nhất của bản ghi (vd: `PO-2026-0001`).
+2. `creation` (`DATETIME(6)`): Thời điểm bản ghi được tạo lần đầu.
+3. `modified` (`DATETIME(6)`): Thời điểm cập nhật bản ghi gần nhất.
+4. `modified_by` (`VARCHAR(140)`): Email người sửa đổi gần nhất.
+5. `owner` (`VARCHAR(140)`): Email người khởi tạo bản ghi.
+6. `docstatus` (`INT(1)`): Trạng thái chứng từ:
+   * **0 (Draft):** Bản nháp, có thể sửa hoặc xóa tự do.
+   * **1 (Submitted):** Đã duyệt, khóa dữ liệu, ghi sổ cái kế toán/kho, không được sửa trực tiếp.
+   * **2 (Cancelled):** Đã hủy bỏ, chứng từ bị vô hiệu hóa nhưng vẫn giữ vết kiểm toán (Audit Trail).
+7. `idx` (`INT(8)`): Thứ tự sắp xếp hiển thị của dòng trong danh sách hoặc bảng con.
 
 ---
 
-*Tài liệu này được tạo để chuẩn hóa kiến thức kiến trúc hệ thống Frappe Framework & ERPNext.*
+## PHẦN 4: SƠ ĐỒ TOÀN DIỆN VỀ VÒNG ĐỜI & CÁCH HOẠT ĐỘNG CỦA DOCTYPE
+
+Một DocType được vận hành bởi sự kết hợp của 4 tệp tin trong cấu trúc thư mục ứng dụng:
+
+```text
+apps/[app_name]/[app_name]/[module]/doctype/[doctype_name]/
+├── [doctype_name].json       # 1. Định nghĩa Metadata (Schema, UI layout, Perms)
+├── [doctype_name].py         # 2. Server Controller (Xử lý logic nghiệp vụ Python)
+├── [doctype_name].js         # 3. Client Controller (Giao diện Desk UI, tương tác JS)
+└── test_[doctype_name].py    # 4. Kiểm thử tự động (Unit Tests)
+```
+
+### Vòng Đời Sự Kiện (Document Lifecycle Event Hooks)
+
+Khi một bản ghi được thao tác từ giao diện Web, REST API hoặc mã Python (`doc.insert()`, `doc.save()`, `doc.submit()`), Frappe kích hoạt chuỗi sự kiện theo đúng thứ tự sau:
+
+```
+[Khởi Tạo] ──────► [Kiểm Tra Hợp Lệ] ──────► [Ghi Vào CSDL] ──────► [Phê Duyệt] ──────► [Lưu Đĩa]
+__init__()          validate()                before_insert()        before_submit()     frappe.db.commit()
+onload()            before_save()             on_update()            on_submit()
+(Nạp RAM)          (Chặn dữ liệu sai)        (Chạy SQL INSERT)      (Ghi sổ cái)        (Ghi vĩnh viễn)
+```
+
+1. **Giai đoạn Kiểm Tra (`validate` & `before_save`):**
+   * Được lập trình viên sử dụng nhiều nhất trong file `.py`.
+   * Kiểm tra điều kiện nghiệp vụ (ví dụ: Số lượng đặt hàng có vượt tồn kho không? Ngày kết thúc có trước ngày bắt đầu không?).
+   * Tự động tính toán các trường công thức (ví dụ: `grand_total = subtotal + tax`).
+2. **Giai đoạn Ghi CSDL (`before_insert` & `on_update`):**
+   * Frappe dịch cấu trúc Object thành câu lệnh `INSERT INTO tab...` hoặc `UPDATE tab...` và gửi xuống MariaDB thông qua C-Extension `mysqlclient`.
+3. **Giai đoạn Phê Duyệt (`on_submit`):**
+   * Chỉ áp dụng cho các DocType có bật tính năng `is_submittable = 1` (như Hóa đơn, Đơn đặt hàng, Phiếu xuất kho).
+   * Chuyển trạng thái `docstatus` từ `0` lên `1`.
+   * Kích hoạt ghi sổ kế toán (General Ledger) và sổ kho (Stock Ledger).
+4. **Cam kết giao dịch (`frappe.db.commit`):**
+   * Hoàn tất giao dịch ACID. Dữ liệu ghi an toàn xuống ổ đĩa.
+   * Nếu có bất kỳ lỗi Python nào xảy ra trong chuỗi trên, Frappe tự động gọi `frappe.db.rollback()` để hủy toàn bộ thay đổi, giữ cho hệ thống không bao giờ bị rác hoặc mất đồng bộ.
+
+---
+
+*Tài liệu kỹ thuật được chuẩn hóa cho hệ sinh thái Frappe Framework & ERPNext.*
